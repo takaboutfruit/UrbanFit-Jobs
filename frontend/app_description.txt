@@ -1,0 +1,85 @@
+App Description & Prompt Specification for Frontend Development
+ชื่อโครงการ (ชั่วคราว): BKK UrbanTalent Match
+แนวคิดหลัก (Concept): แพลตฟอร์มจับคู่แรงงานสาย Tech ยุคใหม่ ที่ไม่ได้ดูแค่ Resume แต่ใช้ AI Challenge วัดทักษะจริง ร่วมกับการคำนวณ ข้อมูลเมืองและการเดินทาง (Urban Data & Commuting) เพื่อช่วย HR คัดคนที่ใช่ และช่วย Candidate วางแผนชีวิตในกรุงเทพฯ ได้อย่างมีคุณภาพ
+
+1. Theme & Design System (แนวทางงานดีไซน์ภาพรวม)
+Mood & Tone: Modern Tech, Clean Dashboard, Data-Driven, Professional
+
+Color Palette: เน้น Dark Mode เป็นหลัก เพื่อให้การแสดงผลแผนที่ (Map Visualization) และกราฟสถิติต่างๆ มีความโดดเด่นและดูเป็นสายเทคโนโลยีขั้นสูง
+
+UI Components: เน้นใช้โครงสร้างแบบ Dashboard, Layout แบ่งฝั่ง (Split Screen), การ์ดข้อมูลที่มีลวดลายกราฟิก/Progress Bar, และปุ่ม Call to Action (CTA) ที่ชัดเจน
+
+2. โครงสร้างและองค์ประกอบของ 4 หน้าจอหลัก (Core Screens)
+หน้าจอที่ 1: Candidate Job Discovery (หน้าค้นหางานและคำนวณการเดินทาง)
+เป้าหมาย: ให้ Candidate ค้นหางานตามความพึงพอใจด้านการเดินทางและไลฟ์สไตล์
+
+Layout: แยกเป็น 2 ฝั่ง (Split Screen)
+
+ฝั่งซ้าย (List View): รายการการ์ดงาน (Job Cards) ที่เรียงตาม "Urban-Fit Score" (ไม่ใช่เรียงตามเวลาที่โพสต์)
+
+ฝั่งขวา (Map View): แผนที่กรุงเทพฯ แบบ Interactive ที่พล็อตพิกัดบริษัทและทับซ้อนด้วยเส้นทางรถไฟฟ้า (เช่น Transit Routes ของ BTS/MRT/BRT)
+
+องค์ประกอบบนหน้าจอ (UI Elements):
+
+Header Area: ช่อง Input ขนาดใหญ่สำหรับปักหมุดที่พัก "Pin your residence in Bangkok" และแถบสไลเดอร์กำหนดเกณฑ์ความอดทนในการเดินทาง "Commuting Tolerance Slider (Max: __ Mins)"
+
+Job Card (การ์ดงานแต่ละใบ): ต้องแสดง:
+
+ชื่อตำแหน่งและบริษัท (เช่น Data Analyst - TechCorp)
+
+Lifestyle Fit Score: 85% (แสดงเป็น Progress Bar หรือวงกลมสีเขียว)
+
+Commuting Time & Route: บอกระยะเวลาและเส้นทาง (เช่น 45 Mins via BTS + BRT)
+
+Estimated Travel Cost: ค่าเดินทางโดยประมาณต่อเดือน (เช่น 1,200 THB/Month)
+
+Work Model Tag: ป้ายบอกรูปแบบการทำงาน (On-site / Hybrid 2 Days / Remote)
+
+หน้าจอที่ 2: AI Roleplay Assessment (หน้าต่างทดสอบทักษะแบบจับเวลา)
+เป้าหมาย: หน้าต่างทำข้อสอบจำลองสถานการณ์จริงเพื่อวัดทักษะสาย Tech และป้องกันการโกง
+
+Layout: Split Screen ด้านซ้ายเป็นข้อมูลบริบท ด้านขวาเป็นห้องแชทกับ AI
+
+องค์ประกอบบนหน้าจอ (UI Elements):
+
+Top Bar: ตัวนับเวลาถอยหลังสีแดงเด่นชัด "Time Remaining per Prompt: 00:45" เพื่อสร้างความกดดัน
+
+Left Panel (Context Data): ตารางแสดงข้อมูลดิบ (Raw Data) ที่ใช้เป็นโจทย์ เช่น ตารางค่าฝุ่น PM2.5 หรือ พิกัดจุดตัดจราจรใน กทม. เพื่อบังคับให้ผู้สมัครใช้ Data ชุดนี้ในการตอบเท่านั้น
+
+Right Panel (Chat & Code Interface): ช่องสำหรับคุยกับ AI และช่องกรอกคำตอบ/พิมพ์โค้ด (Code Editor Box) ของผู้สมัคร
+
+หน้าจอที่ 3: Market-Benchmarked Radar (หน้ารายงานสรุปจุดอ่อน)
+เป้าหมาย: สรุปคะแนนผลการทดสอบเปรียบเทียบกับเกณฑ์บริษัทและค่าเฉลี่ยตลาดแรงงาน
+
+Layout: หน้าจอ Dashboard สรุปผลเดี่ยวๆ (Single View Report)
+
+องค์ประกอบบนหน้าจอ (UI Elements):
+
+Center Section: กราฟใยแมงมุม (Radar Chart) ขนาดใหญ่ แสดงทักษะด้านต่างๆ (เช่น Coding, Data Cleaning, System Design) โดยมีเส้น 3 สีซ้อนทับกัน:
+
+เส้นสีน้ำเงิน: คะแนนของผู้สมัคร (Candidate Score)
+
+เส้นสีเทาไข่ปลา: เกณฑ์ขั้นต่ำของบริษัท (Company Requirement)
+
+เส้นสีส้ม: ค่าเฉลี่ยตลาดแรงงาน (Market Average)
+
+Bottom Section: กล่องข้อความแจ้งเตือนคำแนะนำอัตโนมัติ เช่น "Skill Gap Alert: ทักษะ Data Cleaning ของคุณต่ำกว่าค่าเฉลี่ยตลาด 15%" พร้อมปุ่ม CTA "Explore Upskill Courses"
+
+หน้าจอที่ 4: Zero-Filter HR Dashboard (หน้าคัดกรองสำหรับฝั่ง HR)
+เป้าหมาย: ช่วย HR คัดเลือกคนได้ทันทีโดยไม่ต้องตั้งค่า Filter ค้นหาเองให้เสียเวลา
+
+Layout: หน้าแดชบอร์ดสรุปรายชื่อผู้สมัครแบบพรีเมียม
+
+องค์ประกอบบนหน้าจอ (UI Elements):
+
+Header Text: หัวข้อเด่นชัดเขียนว่า "Top 5 Selected Candidates for Data Analyst" (ไม่มีช่องค้นหาหรือปุ่มตัวกรองใดๆ)
+
+Candidate Profile Card (การ์ดผู้สมัคร 5 คนที่ดีที่สุด): ประกอบด้วย:
+
+Overall Urban-Fit Score: 92% (ตัวเลขใหญ่เด่นสะดุดตา)
+
+Score Breakdown: แถบคะแนนย่อยแยกเป็น Skill Match: 95% และ Commuting Feasibility: 89%
+
+AI Assessment Summary: กล่องข้อความสรุปพฤติกรรมและความสามารถย่อๆ แทนการเปิดดู Resume เช่น "ผู้สมัครแก้โจทย์เสร็จก่อนเวลา มีทักษะการล้างข้อมูลที่แม่นยำ และอาศัยอยู่ใกล้เส้นทาง BRT ทำให้ความเสี่ยงในการลาออกต่ำ"
+
+Action Buttons: ปุ่มสีเขียวเด่นสำหรับ "Schedule Interview" (นัดสัมภาษณ์) และปุ่มสีเทาสำหรับ "Reject & Send Gap Report" (ปฏิเสธพร้อมส่งรายงานจุดอ่อนให้ผู้สมัคร)

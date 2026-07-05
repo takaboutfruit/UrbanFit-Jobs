@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Global dark-mode surface baseline for the app (Requirement 1.1, 1.2, 1.10).
+ * Be Vietnam Pro is the first declared font with a system sans-serif fallback
+ * that preserves the typography scale sizes.
+ */
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: theme("colors.surface-container-lowest");
+    color: theme("colors.on-surface");
+    font-family: theme("fontFamily.sans");
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Material Symbols Outlined baseline (Requirement 1.4). */
+  .material-symbols-outlined {
+    font-family: "Material Symbols Outlined";
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    font-variation-settings:
+      "FILL" 0,
+      "wght" 400,
+      "GRAD" 0,
+      "opsz" 24;
+  }
+
+  .material-symbols-outlined.filled {
+    font-variation-settings:
+      "FILL" 1,
+      "wght" 400,
+      "GRAD" 0,
+      "opsz" 24;
+  }
+}
+
+/**
+ * Transit map company pins (Requirement 5.1/5.8). The pin uses a Leaflet
+ * `divIcon` (no image assets), so its look is defined purely in CSS here.
+ * The selected pin gets a distinct, larger highlighted treatment so at most
+ * one pin stands out at a time (Req 5.8/5.9).
+ */
+@layer components {
+  .company-pin-marker {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 9999px;
+    background-color: theme("colors.secondary");
+    border: 2px solid theme("colors.surface-container-lowest");
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  }
+
+  .company-pin-marker--selected {
+    width: 22px;
+    height: 22px;
+    background-color: theme("colors.primary");
+    border-color: theme("colors.on-surface");
+    box-shadow: 0 0 0 4px rgba(78, 222, 163, 0.35);
+  }
+}
