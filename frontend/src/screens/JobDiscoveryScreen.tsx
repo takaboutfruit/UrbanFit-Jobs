@@ -59,87 +59,54 @@ export interface JobDiscoveryScreenProps {
 }
 
 /**
- * In-file sample dataset so the routed screen renders real content and task 7.7
- * has coordinates to plot. Intentionally varied:
- *   - Some jobs have a `location` coordinate, some are null (unplottable).
- *   - Two jobs share urbanFitScore 88 (Agoda before Bitkub) to exercise the
- *     company A→Z tiebreak from `orderJobs`.
- *   - One job has `commutingMinutes: null` (unavailable) and one exceeds the
- *     default 60-minute tolerance so filtering is visibly meaningful.
- *   - All three work models appear.
+ * In-file sample dataset so the routed screen renders real content and has
+ * coordinates to plot. All jobs share the candidate's pre-selected role
+ * ("Data Analyst" — Req: single-role Job Discovery); the variation across
+ * cards is limited to company, Bangkok neighborhood/location, salary-driving
+ * commute cost, commuting time, work model, and the Urban-Fit match score:
+ *   - Card 1 (high score): TechNova BKK, ย่านอารีย์ (ใกล้ BTS), Hybrid, 95%.
+ *   - Card 2 (medium score): DataSphere Tech, ย่านสาทร, On-site, 78%.
+ *   - Card 3 (low score, for contrast): Global Analytics, ย่านบางนา, On-site,
+ *     45%; its 105-minute commute exceeds the default 60-minute tolerance, so
+ *     it is filtered out until the slider is raised — demonstrating the
+ *     tolerance filter same as before.
  */
 const sampleJobs: Job[] = [
   {
     id: "j1",
-    title: "Senior Data Analyst",
-    company: "Ascend Money",
-    urbanFitScore: 92,
-    lifestyleFitScore: 88,
-    commutingMinutes: 35,
-    routeDescription: "35 นาที ผ่าน BTS",
-    monthlyTravelCostBaht: 1800,
+    title: "Data Analyst",
+    company: "TechNova BKK",
+    urbanFitScore: 95,
+    lifestyleFitScore: 95,
+    commutingMinutes: 25,
+    routeDescription: "25 นาที ผ่าน BTS (ย่านอารีย์)",
+    monthlyTravelCostBaht: 1200,
     workModel: "Hybrid",
-    location: { lat: 13.746, lng: 100.535 },
+    location: { lat: 13.7797, lng: 100.5448 }, // ย่านอารีย์ (ใกล้ BTS)
   },
   {
     id: "j2",
-    title: "Machine Learning Engineer",
-    company: "Agoda",
-    urbanFitScore: 88,
-    lifestyleFitScore: 82,
+    title: "Data Analyst",
+    company: "DataSphere Tech",
+    urbanFitScore: 78,
+    lifestyleFitScore: 78,
     commutingMinutes: 50,
-    routeDescription: "50 นาที ผ่าน MRT + BRT",
-    monthlyTravelCostBaht: 2400,
+    routeDescription: "50 นาที ผ่าน MRT (ย่านสาทร)",
+    monthlyTravelCostBaht: 2500,
     workModel: "On-site",
-    location: { lat: 13.729, lng: 100.524 },
+    location: { lat: 13.7205, lng: 100.5286 }, // ย่านสาทร
   },
   {
     id: "j3",
-    title: "Frontend Developer",
-    company: "Bitkub",
-    urbanFitScore: 88, // tie with Agoda -> Agoda (A) sorts before Bitkub (B)
-    lifestyleFitScore: 79,
-    commutingMinutes: 25,
-    routeDescription: "25 นาที ผ่าน BTS",
-    monthlyTravelCostBaht: 1200,
-    workModel: "Remote",
-    location: null, // no coordinate -> unplottable on the map (Req 5.2)
-  },
-  {
-    id: "j4",
-    title: "Data Scientist",
-    company: "LINE MAN Wongnai",
-    urbanFitScore: 76,
-    lifestyleFitScore: 71,
-    commutingMinutes: null, // commuting time unavailable (Req 4.5 / 5.7)
-    routeDescription: "",
-    monthlyTravelCostBaht: 0,
-    workModel: "Hybrid",
-    location: { lat: 13.7563, lng: 100.5018 },
-  },
-  {
-    id: "j5",
-    title: "Backend Engineer",
-    company: "SCB TechX",
-    urbanFitScore: 64,
-    lifestyleFitScore: 60,
-    commutingMinutes: 95, // exceeds the default 60-min tolerance -> filtered out
-    routeDescription: "95 นาที ผ่าน MRT",
-    monthlyTravelCostBaht: 3200,
+    title: "Data Analyst",
+    company: "Global Analytics",
+    urbanFitScore: 45,
+    lifestyleFitScore: 45,
+    commutingMinutes: 105, // "1 ชม. 45 นาที"
+    routeDescription: "1 ชม. 45 นาที ผ่าน BTS + เรือ (ย่านบางนา)",
+    monthlyTravelCostBaht: 3800,
     workModel: "On-site",
-    location: { lat: 13.701, lng: 100.539 },
-  },
-  {
-    id: "j6",
-    title: "DevOps Engineer",
-    company: "Sea (Garena)",
-    urbanFitScore: 58,
-    lifestyleFitScore: 55,
-    commutingMinutes: 45,
-    routeDescription: "45 นาที ผ่าน BTS + เรือ",
-    monthlyTravelCostBaht: 1500,
-    workModel: "Remote",
-    location: null,
+    location: { lat: 13.669, lng: 100.605 }, // ย่านบางนา
   },
 ];
 

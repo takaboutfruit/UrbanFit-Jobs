@@ -16,26 +16,21 @@
 //           a CTA to explore an upskill challenge.
 //         - Card 4 "ข้อมูลดิบจากการทำงาน": a grid of raw performance metric
 //           stat boxes.
-//   - The existing market-benchmark AdviceAlert is kept below the grid so the
-//     skill-gap advice + upskilling CTA (Req 11) continues to work.
 //
 // Layout: vertical scrolling only at any viewport — `overflow-x-hidden` on
 // the outer section guarantees no horizontal scrollbar is produced. The grid
 // collapses to a single stacked column below the `md:` breakpoint.
 
-import { useMemo } from "react";
 import {
   resolveText,
   type CandidateProfile,
   type RadarData,
-  type RadarSeries,
   type RawMetric,
   type TechnicalSkillCheck,
   type UpskillRecommendation,
 } from "../../domain";
 import { K, strings } from "../../i18n";
 import { RadarChart } from "./RadarChart";
-import { AdviceAlert } from "./AdviceAlert";
 import { CandidateHeader } from "./CandidateHeader";
 import { TechnicalSkillsCard } from "./TechnicalSkillsCard";
 import { UpskillPriorityCard } from "./UpskillPriorityCard";
@@ -53,41 +48,15 @@ export interface RadarScreenProps {
   upskillRecommendations?: UpskillRecommendation[];
   /** Raw performance metrics (Card 4). */
   rawMetrics?: RawMetric[];
-  /** Optional handler for the AdviceAlert "ค้นหาคอร์สอัปสกิล" CTA. Defaults to
-   *  a no-op so the routed screen is safe without a /courses route. */
-  onFindCourses?: () => void;
   /** Optional handler for the "ค้นหา challenge อัปสกิล" CTA in Card 3. Defaults
    *  to a no-op so the routed screen is safe without a /challenges route. */
   onFindChallenge?: () => void;
 }
 
 /**
- * Build a plain `dimension -> value` map from a radar series over the chart's
- * dimension list, so it can be handed to AdviceAlert (which takes
- * `Record<string, number>`). A missing dimension value is treated as 0. A
- * `null` series yields an empty map (AdviceAlert then shows the no-gap
- * confirmation, since there is nothing to compare).
- */
-function seriesToMap(
-  series: RadarSeries | null,
-  dimensions: string[],
-): Record<string, number> {
-  if (series === null) {
-    return {};
-  }
-  const map: Record<string, number> = {};
-  for (const dimension of dimensions) {
-    map[dimension] = series.values[dimension] ?? 0;
-  }
-  return map;
-}
-
-/**
  * Sample radar data so the routed screen renders real content. Six skill
  * dimensions forming a hexagon (Req 2.7) with candidate/requirement/market
- * series scored 0..100. The candidate sits BELOW the market benchmark on
- * "Data Cleaning" (60 vs 78) and "Visualization" (72 vs 76), so AdviceAlert
- * surfaces a gap (largest shortfall = Data Cleaning, 18%).
+ * series scored 0..100.
  */
 const defaultData: RadarData = {
   dimensions: [
@@ -173,25 +142,8 @@ export function RadarScreen({
   technicalSkills = defaultTechnicalSkills,
   upskillRecommendations = defaultUpskillRecommendations,
   rawMetrics = defaultRawMetrics,
-  onFindCourses,
   onFindChallenge,
 }: RadarScreenProps) {
-  // Compare the candidate against the MARKET series (Req 11.1). Derive the
-  // dimension->value maps AdviceAlert needs from the radar series values.
-  const candidateMap = useMemo(
-    () => seriesToMap(data.candidate, data.dimensions),
-    [data.candidate, data.dimensions],
-  );
-  const marketMap = useMemo(
-    () => seriesToMap(data.market, data.dimensions),
-    [data.market, data.dimensions],
-  );
-
-  // No-op fallback keeps the routed screen safe without a /courses route.
-  const handleFindCourses = onFindCourses ?? (() => {});
-
-  const marketLabel = resolveText(K.radarLegendMarket, strings);
-
   return (
     // overflow-x-hidden + a centered max-width column => vertical scroll only,
     // no horizontal scrollbar at any viewport (Req 14.4 / 14.5).
@@ -234,14 +186,6 @@ export function RadarScreen({
             <RawMetricsCard metrics={rawMetrics} />
           </div>
         </div>
-
-        {/* Market-benchmark skill-gap advice + upskilling CTA (Req 11). */}
-        <AdviceAlert
-          candidate={candidateMap}
-          benchmark={marketMap}
-          benchmarkLabel={marketLabel}
-          onFindCourses={handleFindCourses}
-        />
       </div>
     </section>
   );

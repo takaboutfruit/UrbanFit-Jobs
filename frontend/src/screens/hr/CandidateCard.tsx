@@ -145,14 +145,16 @@ export function CandidateCard({
         />
         <div
           data-testid="ai-summary"
-          className="max-h-32 overflow-y-auto rounded border border-outline bg-surface-container-low p-space-sm text-body-md text-on-surface"
+          className="max-h-32 overflow-y-auto rounded border border-outline bg-surface-container-low p-space-md text-body-md text-on-surface"
         >
           {candidate.aiSummary}
         </div>
       </div>
 
-      {/* Action buttons (Req 13.4–13.7) with activation feedback (Req 13.10). */}
-      <div className="flex flex-col gap-space-sm sm:flex-row">
+      {/* Action buttons (Req 13.4–13.7) with activation feedback (Req 13.10).
+          Both buttons use flex-1 so they stay evenly proportioned, with a
+          balanced gap between them. */}
+      <div className="flex flex-col gap-space-md sm:flex-row">
         <button
           type="button"
           data-testid="schedule-button"

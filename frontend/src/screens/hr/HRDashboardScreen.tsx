@@ -53,7 +53,8 @@ function buildTitle(count: number, targetRole: string): string {
     .replace("{role}", targetRole);
 }
 
-/** Small sample shortlist so the routed screen renders real content. */
+/** Sample shortlist of 5 candidates so the routed screen renders real content
+ *  matching the zero-filter "top 5" shortlist (Req 12.1, 12.3). */
 const defaultShortlist: HRShortlist = {
   targetRole: "Data Analyst",
   candidates: [
@@ -83,6 +84,24 @@ const defaultShortlist: HRShortlist = {
       commutingFeasibility: 88,
       aiSummary:
         "พื้นฐานสถิติแน่น เรียนรู้เร็ว แต่ควรพัฒนาการนำเสนอผลลัพธ์ให้เข้าใจง่ายขึ้น",
+    },
+    {
+      id: "c4",
+      name: "พิมพ์ชนก แสงทอง",
+      urbanFitScore: 75,
+      skillMatch: 70,
+      commutingFeasibility: 82,
+      aiSummary:
+        "ถามคำถามเพื่อทำความเข้าใจโจทย์ก่อนลงมือทำ มีวิธีคิดเป็นขั้นเป็นตอน แต่ยังใช้เวลานานกับการเขียน Query ที่ซับซ้อน",
+    },
+    {
+      id: "c5",
+      name: "วรากร ทองสุข",
+      urbanFitScore: 71,
+      skillMatch: 68,
+      commutingFeasibility: 75,
+      aiSummary:
+        "พื้นฐาน Python และการแสดงผลข้อมูลอยู่ในระดับดี สื่อสารตรงประเด็น แต่ควรฝึกการวิเคราะห์เชิงสถิติเพิ่มเติม",
     },
   ],
 };
@@ -122,9 +141,10 @@ export function HRDashboardScreen({
           className="rounded-md border border-outline bg-surface-container p-space-lg text-body-md text-on-surface-variant"
         />
       ) : (
-        // One card per candidate. Single column on mobile (<768px), wider grid
-        // at >=768px (Req 14.3). No search/filter/sort controls are rendered
-        // anywhere in this screen (Req 12.2).
+        // One card per candidate. Single column on mobile (<768px), a wider
+        // grid at >=768px, capping at 3 columns on large screens so cards
+        // wrap onto additional rows instead of stretching/squishing
+        // (Req 14.3).
         <div
           data-testid="candidate-grid"
           className="grid grid-cols-1 gap-space-lg md:grid-cols-2 xl:grid-cols-3"

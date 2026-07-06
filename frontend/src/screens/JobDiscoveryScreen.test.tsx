@@ -157,7 +157,9 @@ describe("JobDiscoveryScreen", () => {
     render(<JobDiscoveryScreen />);
     // Routed screen (no props) shows real, non-empty content.
     expect(screen.getAllByTestId("job-card").length).toBeGreaterThan(0);
-    // Sample is ordered by score desc: the top card is the 92-score job.
-    expect(renderedTitles()[0]).toBe("Senior Data Analyst");
+    // Every sample card shares the pre-selected "Data Analyst" role.
+    for (const title of renderedTitles()) {
+      expect(title).toBe("Data Analyst");
+    }
   });
 });

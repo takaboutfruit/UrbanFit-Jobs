@@ -49,7 +49,7 @@ import { RadarScreen } from "./RadarScreen";
 function renderScreen() {
   return render(
     <MemoryRouter initialEntries={["/radar"]}>
-      <RadarScreen onFindCourses={() => {}} />
+      <RadarScreen />
     </MemoryRouter>,
   );
 }
