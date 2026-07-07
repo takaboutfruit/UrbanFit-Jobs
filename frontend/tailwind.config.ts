@@ -50,6 +50,12 @@ const config: Config = {
         "on-error-container": "#ffdad6",
         // Destructive is an alias of error for HR reject action
         destructive: "#f85149",
+        // Financial_Comparison_Row commute-cost severity tokens (calibrated
+        // Bangkok urban thresholds): 0-3.0% mint, 3.1-10.0% muted gray,
+        // >10.0% coral red.
+        "financial-positive": "#00e676",
+        "financial-neutral": "#A0AEC0",
+        "financial-negative": "#ff5252",
       },
       fontFamily: {
         // Be Vietnam Pro first, with a system sans-serif fallback stack that

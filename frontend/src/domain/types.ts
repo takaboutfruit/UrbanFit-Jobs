@@ -6,6 +6,8 @@
 // All scoring/route/AI computation happens upstream; the frontend renders
 // what it is given and applies client-side ordering/filtering/formatting.
 
+import type { TransitSegment } from "./transit";
+
 /** Work model shown as exactly one Work_Model_Tag on a Job Card (Req 4.7). */
 export type WorkModel = "On-site" | "Hybrid" | "Remote";
 
@@ -15,26 +17,71 @@ export interface Coordinate {
   lng: number;
 }
 
-/** A single job rendered as a Job_Card and (when locatable) a Company_Pin. */
+/**
+ * A single job rendered as a Job_Card and (when locatable) a Company_Pin.
+ *
+ * Feature: job-discovery-map-first extends this view model with map-first
+ * commute fields (`commutingMinutes`, `perTripCostBaht`, `transitSegments`,
+ * `commuteFitScore`, `skillFitScore`, `location`). The pre-existing
+ * `urbanFitScore`, `lifestyleFitScore`, `routeDescription`, and
+ * `monthlyTravelCostBaht` fields are retained (deprecated for the discovery
+ * screen) since other screens still read them.
+ */
 export interface Job {
   id: string;
   /** Non-empty job title (Req 4.3). */
   title: string;
   /** Non-empty company name; also the A→Z tiebreak key (Req 4.2, 4.3). */
   company: string;
-  /** 0..100; primary ordering key, highest first (Req 4.1). */
+  /**
+   * 0..100; primary ordering key, highest first (Req 4.1).
+   * @deprecated Retained for other screens; the Map-First discovery screen
+   * uses `commuteFitScore` and `skillFitScore` instead.
+   */
   urbanFitScore: number;
-  /** 0..100; shown with a progress indicator (Req 4.4). */
+  /**
+   * 0..100; shown with a progress indicator (Req 4.4).
+   * @deprecated Retained for other screens.
+   */
   lifestyleFitScore: number;
-  /** Whole minutes; null = commuting time unavailable (Req 5.7). */
+  /**
+   * Whole minutes (0..999); null = commuting time unavailable
+   * (Req 4.1, 4.5, 5.7).
+   */
   commutingMinutes: number | null;
-  /** e.g. "45 นาที ผ่าน BTS + BRT" (Req 4.5). */
+  /**
+   * e.g. "45 นาที ผ่าน BTS + BRT" (Req 4.5).
+   * @deprecated Retained for other screens; the Map-First discovery screen
+   * derives its Primary_Row text via `formatPrimaryRow` instead.
+   */
   routeDescription: string;
-  /** 0..999,999 baht/month; formatted via formatMonthlyCostTHB (Req 4.6). */
+  /**
+   * 0..999,999 baht/month; formatted via formatMonthlyCostTHB (Req 4.6).
+   * @deprecated Retained for other screens; the Map-First discovery screen
+   * uses `perTripCostBaht` instead.
+   */
   monthlyTravelCostBaht: number;
+  /** Whole baht (0..999,999) per trip; used by Primary_Row (Req 4.1, 4.2). */
+  perTripCostBaht: number;
+  /** Whole baht/month gross salary; shown in the Financial_Comparison_Row. */
+  salaryBaht: number;
+  /**
+   * Whole baht/month commute overhead (perTripCostBaht * 2 trips/day *
+   * 22 working days/month); shown in the Financial_Comparison_Row.
+   */
+  monthlyCommuteCostBaht: number;
+  /**
+   * Ordered transit legs for the Transit_Chain_Row; null/empty = unavailable
+   * (Req 5.1, 5.6).
+   */
+  transitSegments: TransitSegment[] | null;
+  /** 0..100; null = unavailable, shown as fit-unavailable (Req 6.3, 6.6, 9.5). */
+  commuteFitScore: number | null;
+  /** 0..100; null = unavailable, shown as fit-unavailable (Req 6.4, 6.7). */
+  skillFitScore: number | null;
   /** Exactly one work model (Req 4.7). */
   workModel: WorkModel;
-  /** null = not plottable on the transit map (Req 5.2). */
+  /** Company coordinate; null = not plottable on the transit map (Req 8.3). */
   location: Coordinate | null;
 }
 

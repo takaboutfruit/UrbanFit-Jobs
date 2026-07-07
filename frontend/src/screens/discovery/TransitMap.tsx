@@ -32,9 +32,19 @@ import { MapContainer, TileLayer, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { T } from "../../components";
 import { K, strings } from "../../i18n";
-import { resolveText } from "../../domain";
-import type { Coordinate, Job, TransitLine } from "../../domain";
+import {
+  buildIsochrone,
+  filterByTolerance,
+  filterJobsByIsochrone,
+  isValidCoordinate,
+  resolveText,
+} from "../../domain";
+import type { Coordinate, Job, MapBounds, TransitLine } from "../../domain";
 import { CompanyPin } from "./CompanyPin";
+import { HomePin } from "./HomePin";
+import { IsochroneOverlay } from "./IsochroneOverlay";
+import { BoundaryLabel } from "./BoundaryLabel";
+import { ViewportWatcher } from "./ViewportWatcher";
 import {
   SAMPLE_TRANSIT_LINES,
   TRANSIT_STYLE,
@@ -54,15 +64,6 @@ export interface JobCoordinatePartition {
   plottable: Job[];
   /** Count of jobs with no valid coordinate (Req 5.2). */
   unplottableCount: number;
-}
-
-/** A coordinate is valid when both lat and lng are finite numbers. */
-function isValidCoordinate(location: Coordinate | null): location is Coordinate {
-  return (
-    location != null &&
-    Number.isFinite(location.lat) &&
-    Number.isFinite(location.lng)
-  );
 }
 
 /**
@@ -136,6 +137,12 @@ export interface TransitMapProps {
   selectedJobId: string | null;
   /** Called with a job id when a pin is activated. */
   onSelect: (id: string) => void;
+  /** Candidate's home/residence coordinate, or null when unset (Req 7.1, 7.2, 7.6). */
+  home: Coordinate | null;
+  /** Current maximum commuting time in minutes driving the isochrone radius (Req 7.3, 7.4, 8.x). */
+  toleranceMinutes: number;
+  /** Called with the new viewport bounds once panning/zooming has settled (Req 9.1). */
+  onViewportSettle?: (bounds: MapBounds) => void;
   /** Transit routes to overlay; defaults to an in-file Bangkok sample. */
   transitLines?: TransitLine[];
   /** Extra classes for the outer wrapper. */
@@ -149,12 +156,28 @@ export function TransitMap({
   jobs,
   selectedJobId,
   onSelect,
+  home,
+  toleranceMinutes,
+  onViewportSettle,
   transitLines = SAMPLE_TRANSIT_LINES,
   className,
 }: TransitMapProps) {
   const isMobile = useIsMobileViewport();
   const { plottable, unplottableCount } = partitionJobsByCoordinate(jobs);
   const hasNoLocations = plottable.length === 0;
+  // Map pins are filtered by the isochrone (Req 8.1-8.4). When home is unset
+  // `buildIsochrone` returns [] so `filterJobsByIsochrone` yields no pins; the
+  // "home not set" message (below) explains why, and the map still renders
+  // (Req 7.6). Hard threshold (Req: strict filter logic): a job whose
+  // commute time exceeds `toleranceMinutes` never appears as a pin either,
+  // even if its coordinate falls inside the isochrone's geometric
+  // approximation.
+  const isochronePins = isValidCoordinate(home)
+    ? filterJobsByIsochrone(
+        filterByTolerance(plottable, toleranceMinutes),
+        buildIsochrone(home, toleranceMinutes),
+      )
+    : [];
 
   return (
     <div
@@ -200,8 +223,14 @@ export function TransitMap({
           );
         })}
 
-        {/* One CompanyPin per plottable job (Req 5.1); selected one highlighted. */}
-        {plottable.map((job) => (
+        {/* Isochrone below the pins; omitted entirely when home is invalid (Req 7.3, 7.6). */}
+        <IsochroneOverlay home={home} toleranceMinutes={toleranceMinutes} />
+
+        {/* Home marker; omitted when home is invalid (Req 7.1, 7.2). */}
+        <HomePin home={home} />
+
+        {/* Company pins filtered to the isochrone (Req 8.1-8.4); selected one highlighted. */}
+        {isochronePins.map((job) => (
           <CompanyPin
             key={job.id}
             job={job}
@@ -209,9 +238,28 @@ export function TransitMap({
             onSelect={onSelect}
           />
         ))}
+
+        {/* Debounced viewport-settle notifications (Req 9.1). */}
+        <ViewportWatcher
+          onSettle={(bounds) => onViewportSettle?.(bounds)}
+        />
       </MapContainer>
 
       {/* --- Plain-DOM overlays (always present & queryable) ----------------- */}
+
+      {/* Boundary label anchored on the shaded isochrone area (Req 7.5). */}
+      <BoundaryLabel home={home} />
+
+      {/* Home-not-set message; map itself still renders (Req 7.6). */}
+      {!isValidCoordinate(home) && (
+        <div
+          data-testid="map-home-not-set"
+          role="status"
+          className="absolute inset-x-space-md top-space-md z-[1000] rounded-lg bg-surface-container/90 p-space-sm text-center text-body-md text-on-surface-variant shadow-lg"
+        >
+          <T k={K.homeNotSet} />
+        </div>
+      )}
 
       {/* Legend identifying each transit line (Req 5.5). */}
       <ul

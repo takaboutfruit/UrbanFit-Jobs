@@ -66,6 +66,43 @@ export const strings: I18nTable = {
   [K.workModelHybrid]: { th: "ไฮบริด", default: "Hybrid" },
   [K.workModelRemote]: { th: "ทำงานทางไกล", default: "Remote" },
 
+  // Screen 1 — Map-First Job Discovery (job-discovery-map-first)
+  [K.discoveryMapTitle]: {
+    th: "หางานใกล้บ้านภายใน 20 นาที",
+    default: "Find jobs within a 20-minute commute",
+  },
+  [K.discoveryMapSubtitle]: {
+    th: "เพื่อคุณภาพชีวิตที่ดียิ่งขึ้น",
+    default: "For a better quality of life",
+  },
+  [K.perTripUnit]: { th: "เที่ยว", default: "trip" },
+  [K.commuteFitLabel]: { th: "ความเหมาะสมด้านการเดินทาง", default: "Commute Fit" },
+  [K.skillFitLabel]: { th: "ความเหมาะสมด้านทักษะ", default: "Skill Fit" },
+  [K.fitUnavailable]: { th: "ไม่มีข้อมูล", default: "N/A" },
+  [K.isochroneBoundaryLabel]: {
+    th: "ขอบเขตเดินทาง 20 นาที",
+    default: "20-minute reachable area",
+  },
+  [K.homeNotSet]: {
+    th: "ยังไม่ได้ตั้งค่าตำแหน่งบ้าน",
+    default: "Home location is not set",
+  },
+  [K.transitModeWalk]: { th: "เดิน", default: "Walk" },
+  [K.transitModeBts]: { th: "BTS", default: "BTS" },
+  [K.transitModeMrt]: { th: "MRT", default: "MRT" },
+
+  // Screen 1 — Financial comparison row (job-card-financial-metrics)
+  [K.salaryLabel]: { th: "เงินเดือน", default: "Salary" },
+  [K.monthlyCommuteCostLabel]: { th: "ค่าเดินทาง", default: "Commute cost" },
+  [K.perMonthUnit]: { th: "เดือน", default: "month" },
+  // {percent} placeholder, e.g. "5.5% ของเงินเดือน" (Req: unambiguous ratio).
+  [K.percentOfSalaryLabel]: {
+    th: "{percent}% ของเงินเดือน",
+    default: "{percent}% of salary",
+  },
+  [K.commuteFitBadgeLabel]: { th: "การเดินทาง", default: "Commute" },
+  [K.skillFitBadgeLabel]: { th: "ทักษะที่ตรง", default: "Skill match" },
+
   // Transit map
   [K.mapNoLocations]: {
     th: "ไม่มีข้อมูลตำแหน่งบริษัท",

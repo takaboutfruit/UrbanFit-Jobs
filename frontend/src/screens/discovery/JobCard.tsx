@@ -1,26 +1,31 @@
-// Feature: urbanfit-jobs-frontend
-// Screen 1 — Job Discovery: JobCard (task 7.3).
-//
-// Renders a single job as an interactive, selectable card.
+// Feature: job-discovery-map-first
+// Job_Card (task 8.5): composes the Map-First rows in order — a Top_Row
+// (Primary_Row anchored left, Salary_Tag anchored top-right), Transit_Chain_Row,
+// Job_Meta_Row, Financial_Comparison_Row (commute cost only), Fit_Badges —
+// replacing the old single unified fit ring layout.
 //
 // Requirements:
-//   - 4.3: non-empty job title and company name.
-//   - 4.4: Lifestyle-Fit-Score with a progress indicator whose fill matches
-//     the percentage (ProgressRing with showValue).
-//   - 4.5: commuting time (whole minutes) + route description; when
-//     commutingMinutes is null, show the commute-unavailable indicator.
-//   - 4.6: estimated monthly travel cost via formatMonthlyCostTHB.
-//   - 4.7 / Property 5: EXACTLY ONE Work-Model tag whose text is the work
-//     model (exposed via data-testid="work-model-tag").
-//   - 4.8: selected state visually distinct (primary ring/border) and
-//     detectable via aria-pressed / data-selected; the whole card is a button
-//     calling onSelect(job.id).
+//   - 4.1: Primary_Row (top-left) shows commuting time + per-trip cost.
+//   - UI Layout Refactor (Spatial Distribution): Salary_Tag anchors to the
+//     top-right corner, directly opposite the commute time, to spread the
+//     financial data and reduce clutter in the bottom row.
+//   - 5.1: Transit_Chain_Row renders the job's transit segments.
+//   - 6.1: Job_Meta_Row shows the demoted title/company (merged single line,
+//     no duplication).
+//   - 6.2: Fit_Badges shows Commute_Fit_Badge left of Skill_Fit_Badge.
+//   - 6.5: no single unified circular fit chart (ProgressRing) is rendered.
+//
+// Selection behavior (whole card is a focusable button, aria-pressed /
+// data-selected, selected ring/border treatment) is unrelated to this task
+// and is preserved as-is from the prior implementation.
 
-import { ProgressRing, T, Icon } from "../../components";
-import { formatMonthlyCostTHB, resolveText } from "../../domain";
-import type { Job, WorkModel } from "../../domain";
-import { K, strings } from "../../i18n";
-import type { I18nKey } from "../../i18n";
+import { PrimaryRow } from "./PrimaryRow";
+import { SalaryTag } from "./SalaryTag";
+import { TransitChainRow } from "./TransitChainRow";
+import { JobMetaRow } from "./JobMetaRow";
+import { FinancialComparisonRow } from "./FinancialComparisonRow";
+import { FitBadges } from "./FitBadges";
+import type { Job } from "../../domain";
 
 export interface JobCardProps {
   /** The job view model to render. */
@@ -33,13 +38,6 @@ export interface JobCardProps {
   className?: string;
 }
 
-/** Map a WorkModel value to its i18n key so the tag renders a localized label. */
-const WORK_MODEL_KEY: Record<WorkModel, I18nKey> = {
-  "On-site": K.workModelOnsite,
-  Hybrid: K.workModelHybrid,
-  Remote: K.workModelRemote,
-};
-
 /**
  * A single Job Card.
  *
@@ -49,10 +47,12 @@ const WORK_MODEL_KEY: Record<WorkModel, I18nKey> = {
  *   - `data-selected={isSelected}`
  * and the selected visual treatment (primary ring + border) is applied only
  * when `isSelected` is true.
+ *
+ * The card body composes the four Map-First rows in order (Req 4.1, 5.1,
+ * 6.1, 6.2): Primary_Row, Transit_Chain_Row, Job_Meta_Row, Fit_Badges. There
+ * is no unified fit ring anywhere on the card (Req 6.5).
  */
 export function JobCard({ job, isSelected, onSelect, className }: JobCardProps) {
-  const workModelLabel = resolveText(WORK_MODEL_KEY[job.workModel], strings);
-
   return (
     <button
       type="button"
@@ -61,7 +61,7 @@ export function JobCard({ job, isSelected, onSelect, className }: JobCardProps) 
       aria-pressed={isSelected}
       onClick={() => onSelect(job.id)}
       className={[
-        "flex w-full flex-col gap-space-md rounded-xl border p-space-lg text-left transition-colors",
+        "flex w-full flex-col gap-space-sm rounded-xl border p-space-lg text-left transition-colors",
         "bg-surface-container",
         isSelected
           ? "border-primary ring-2 ring-primary"
@@ -71,69 +71,23 @@ export function JobCard({ job, isSelected, onSelect, className }: JobCardProps) 
         .filter(Boolean)
         .join(" ")}
     >
-      {/* Title + company (Req 4.3) alongside the Lifestyle-Fit-Score ring (Req 4.4). */}
-      <div className="flex items-start justify-between gap-space-md">
-        <div className="flex min-w-0 flex-col gap-space-xs">
-          <span
-            data-testid="job-title"
-            className="truncate text-body-lg font-semibold text-on-surface"
-          >
-            {job.title}
-          </span>
-          <span
-            data-testid="job-company"
-            className="truncate text-body-md text-on-surface-variant"
-          >
-            {job.company}
-          </span>
-        </div>
-        <div className="flex shrink-0 flex-col items-center gap-space-xs">
-          <ProgressRing
-            percent={job.lifestyleFitScore}
-            showValue
-            ariaLabel={resolveText(K.lifestyleFitLabel, strings)}
-          />
-          <T
-            k={K.lifestyleFitLabel}
-            as="span"
-            className="text-label-sm text-on-surface-variant"
-          />
-        </div>
+      <div data-testid="top-row" className="flex items-start justify-between gap-space-sm">
+        <PrimaryRow
+          commuteMinutes={job.commutingMinutes}
+          perTripCostBaht={job.perTripCostBaht}
+        />
+        <SalaryTag salaryBaht={job.salaryBaht} />
       </div>
-
-      {/* Commute time + route, or the unavailable indicator (Req 4.5). */}
-      <div
-        data-testid="job-commute"
-        className="flex items-center gap-space-xs text-body-md text-on-surface"
-      >
-        <Icon name="directions_transit" aria-hidden className="text-secondary" />
-        {job.commutingMinutes === null ? (
-          <T
-            k={K.commuteUnavailable}
-            as="span"
-            className="text-on-surface-variant"
-          />
-        ) : (
-          <span data-testid="job-route">{job.routeDescription}</span>
-        )}
-      </div>
-
-      {/* Monthly travel cost (Req 4.6) + exactly one Work-Model tag (Req 4.7). */}
-      <div className="flex items-center justify-between gap-space-md">
-        <span
-          data-testid="job-cost"
-          className="flex items-center gap-space-xs text-body-md text-on-surface"
-        >
-          <Icon name="payments" aria-hidden className="text-secondary" />
-          {formatMonthlyCostTHB(job.monthlyTravelCostBaht)}
-        </span>
-        <span
-          data-testid="work-model-tag"
-          className="rounded-full bg-surface-container-high px-space-md py-space-xs text-label-sm text-on-surface"
-        >
-          {workModelLabel}
-        </span>
-      </div>
+      <TransitChainRow segments={job.transitSegments} />
+      <JobMetaRow title={job.title} company={job.company} />
+      <FinancialComparisonRow
+        salaryBaht={job.salaryBaht}
+        monthlyCommuteCostBaht={job.monthlyCommuteCostBaht}
+      />
+      <FitBadges
+        commuteFitScore={job.commuteFitScore}
+        skillFitScore={job.skillFitScore}
+      />
     </button>
   );
 }

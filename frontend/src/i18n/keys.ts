@@ -33,6 +33,27 @@ export const K = {
   workModelHybrid: "workModel.hybrid",
   workModelRemote: "workModel.remote",
 
+  // Screen 1 — Map-First Job Discovery (job-discovery-map-first)
+  discoveryMapTitle: "discovery.mapFirst.title",
+  discoveryMapSubtitle: "discovery.mapFirst.subtitle",
+  perTripUnit: "discovery.mapFirst.perTripUnit",
+  commuteFitLabel: "discovery.mapFirst.commuteFitLabel",
+  skillFitLabel: "discovery.mapFirst.skillFitLabel",
+  fitUnavailable: "discovery.mapFirst.fitUnavailable",
+  isochroneBoundaryLabel: "discovery.mapFirst.isochroneBoundaryLabel",
+  homeNotSet: "discovery.mapFirst.homeNotSet",
+  transitModeWalk: "discovery.mapFirst.transitModeWalk",
+  transitModeBts: "discovery.mapFirst.transitModeBts",
+  transitModeMrt: "discovery.mapFirst.transitModeMrt",
+
+  // Screen 1 — Financial comparison row (job-card-financial-metrics)
+  salaryLabel: "discovery.mapFirst.salaryLabel",
+  monthlyCommuteCostLabel: "discovery.mapFirst.monthlyCommuteCostLabel",
+  perMonthUnit: "discovery.mapFirst.perMonthUnit",
+  percentOfSalaryLabel: "discovery.mapFirst.percentOfSalaryLabel",
+  commuteFitBadgeLabel: "discovery.mapFirst.commuteFitBadgeLabel",
+  skillFitBadgeLabel: "discovery.mapFirst.skillFitBadgeLabel",
+
   // Transit map
   mapNoLocations: "map.noLocations",
   mapUnplottableCount: "map.unplottableCount",
