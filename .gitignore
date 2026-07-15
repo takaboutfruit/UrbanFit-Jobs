@@ -1,0 +1,34 @@
+# =========================
+# Backend (Python)
+# =========================
+backend/.venv/
+backend/.env
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Frontend (Node.js / Vite)
+# =========================
+frontend/node_modules/
+frontend/dist/
+frontend/.kiro/
+frontend/.env
+frontend/.env.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# Datasets (Optional)
+# =========================
+# Uncomment the line below if you want to ignore all CSVs and prevent committing large datasets.
+# datasets/*.csv
+
+# =========================
+# OS / IDE specific files
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
