@@ -131,8 +131,23 @@ function AppShellContent() {
           RouteErrorBoundary guards ONLY this content region, so a failed chunk
           load or a screen render error keeps the surrounding nav chrome active
           and surfaces a non-blocking, dismissible error (Req 2.5). Passing the
-          active pathname as resetKey clears a prior failure on each navigation. */}
-      <main className="min-h-full flex-1 pb-24 md:pb-0">
+          active pathname as resetKey clears a prior failure on each navigation.
+
+          At `lg:` (1024px, where routed screens like Job Discovery switch to
+          their two-region split), <main> is pinned to exactly the viewport
+          height (`lg:h-screen`, matching the side nav's own `md:h-screen`)
+          and scrolls its own content internally (`lg:overflow-y-auto`)
+          instead of letting the whole page grow taller than the viewport.
+          Without this cap, a tall routed screen's secondary region (e.g. Job
+          Discovery's job list) stretches <main> — and everything inside it,
+          including a primary region meant to stay fully visible (the map)
+          — past the viewport, so the browser scrolls the WHOLE page instead
+          of just the secondary region's own content. That both defeats a
+          "stays visible" region and makes Leaflet's map container resize
+          unpredictably while scrolling. Below `lg:` (single-column layout,
+          including the md-only tablet width), natural full-page scrolling
+          is kept as before. */}
+      <main className="min-h-full flex-1 overflow-y-visible pb-24 md:pb-0 lg:h-screen lg:overflow-y-auto">
         {isRouteAllowed ? (
           <RouteErrorBoundary resetKey={pathname}>
             <Suspense fallback={<ScreenFallback />}>

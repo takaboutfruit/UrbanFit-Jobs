@@ -33,6 +33,15 @@ export const K = {
   workModelHybrid: "workModel.hybrid",
   workModelRemote: "workModel.remote",
 
+  // Screen 1 — Live search field-mapping placeholders (job-discovery-live-search)
+  jobTitleUnavailable: "discovery.job.titleUnavailable",
+  companyNameUnavailable: "discovery.job.companyNameUnavailable",
+
+  // Screen 1 — Live search loading/error states (job-discovery-live-search)
+  discoveryLoading: "discovery.liveSearch.loading",
+  discoveryErrorMessage: "discovery.liveSearch.errorMessage",
+  discoveryRetryAction: "discovery.liveSearch.retryAction",
+
   // Screen 1 — Map-First Job Discovery (job-discovery-map-first)
   discoveryMapTitle: "discovery.mapFirst.title",
   discoveryMapSubtitle: "discovery.mapFirst.subtitle",

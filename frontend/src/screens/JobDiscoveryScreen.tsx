@@ -1,6 +1,6 @@
-// Feature: job-discovery-map-first
+// Feature: job-discovery-live-search
 // Screen 1 — Candidate Job Discovery: Map-First composition + interaction
-// state (task 12.1).
+// state, wired to the live GET /search endpoint (task 13).
 //
 // The candidate's Job Role and Residence are already pre-selected during
 // onboarding, so this screen no longer owns editable residence text — the
@@ -16,20 +16,29 @@
 //   - viewportBounds   : MapBounds | null — the current settled map
 //                                         viewport bounds (Req 9.1).
 //
-// Two SEPARATE derivation pipelines run in parallel because the requirements
-// assign them different sources (see design.md "State ownership and data
-// flow"):
-//   - Map pins: `filterJobsByIsochrone(jobs, buildIsochrone(home,
-//     toleranceMinutes))` in a single `useMemo`, so the isochrone rebuilds
-//     and re-filters synchronously whenever `home`/`toleranceMinutes` change
-//     (Req 7.4, 8.4). The filtered pins are passed to `TransitMap`, which
-//     also applies the same isochrone filter internally (task 11.5) as a
-//     defensive no-op.
+// Job source (Req 1.1, 1.2, 1.5-1.7, 6.1-6.3): when the screen is rendered
+// without an explicit `jobs` prop (the routed, no-props case), jobs come
+// from the live `useJobSearch(home, toleranceMinutes)` hook — no more
+// in-file sample dataset or client-side commute-boundary gate. When an
+// explicit `jobs` prop IS provided, it's used directly (bypassing the live
+// fetch — the hook is fed a `null` home in that case so its own validation
+// gate never issues a request) for backward compatibility with callers that
+// already have a job list.
+//   - Map pins: every job with a valid coordinate is passed to `TransitMap`,
+//     which plots one pin per job with a valid `location` — no
+//     commute-boundary gate (Req 6.1, 6.2, 6.4).
 //   - List cards: `orderByCommuteFit(filterJobsByViewport(jobs,
-//     viewportBounds))` (Req 9.1, 9.4, 9.5) — filtered by the current map
-//     viewport, then ordered by descending Commute Fit with an A→Z tiebreak.
-//     `JobList` already renders its own empty-state (K.jobsEmpty) when given
-//     zero cards (Req 8.5, 9.4).
+//     viewportBounds))` — restricted to the current map viewport (so the
+//     list only ever shows what's currently visible on the map, not
+//     off-screen pins), then ordered by descending Commute Fit with an A→Z
+//     tiebreak (Req 9.5, 6.3). `JobList` already renders its own empty-state
+//     (K.jobsEmpty) when given zero cards (Req 8.5, 9.4, 5.5).
+//   - List region status (Req 5.1, 5.5, 5.6): while sourcing from
+//     `useJobSearch`, the list region renders `LoadingState` while a request
+//     is in flight, `ErrorState` (wired to `retry`) when the latest request
+//     failed, and the `JobList` otherwise. The map region is unaffected by
+//     `status` — it always renders the current `jobs`, regardless of
+//     whether the list region is showing Loading_State or Error_State.
 //
 // Layout (Req 3.1 / 3.2 / 3.3):
 //   - <1024px  : a single stacked column; the JobList is the primary,
@@ -43,12 +52,8 @@
 
 import { useMemo, useState } from "react";
 import {
-  buildIsochrone,
   clampToleranceStep,
-  filterByTolerance,
-  filterJobsByIsochrone,
   filterJobsByViewport,
-  isValidCoordinate,
   orderByCommuteFit,
   resolveText,
   TOLERANCE_TARGET,
@@ -56,99 +61,41 @@ import {
   type Job,
   type MapBounds,
 } from "../domain";
-import { DiscoveryHeader, JobList, TransitMap } from "./discovery";
+import {
+  DiscoveryHeader,
+  ErrorState,
+  JobList,
+  LoadingState,
+  TransitMap,
+  useJobSearch,
+  type SearchStatus,
+} from "./discovery";
 import { K, strings } from "../i18n";
 
 /**
- * In-file sample dataset so the routed screen renders real content and has
- * coordinates to plot. All jobs share the candidate's pre-selected role
- * ("Data Analyst" — Req: single-role Job Discovery); the variation across
- * cards is limited to company, Bangkok neighborhood/location, salary-driving
- * commute cost, commuting time, work model, and the Commute/Skill Fit scores:
- *   - Card 1 (high commute fit): TechNova BKK, ย่านอารีย์ (ใกล้ BTS), Hybrid.
- *   - Card 2 (medium commute fit): DataSphere Tech, ย่านสาทร, On-site.
- *   - Card 3 (low commute fit, for contrast): Global Analytics, ย่านบางนา,
- *     On-site — its coordinate is farther from the sample home, demonstrating
- *     isochrone/viewport filtering the same as before.
+ * Default candidate home coordinate (ย่านอารีย์-ish) for the routed screen,
+ * used when no `home` prop is supplied. This is the same coordinate the
+ * screen has always defaulted to (previously named `sampleHome`); only the
+ * in-file `sampleJobs` dataset was removed by task 13 — the default home
+ * source is unchanged per the design's key decision 5.
  */
-const sampleJobs: Job[] = [
-  {
-    id: "j1",
-    title: "Data Analyst",
-    company: "TechNova BKK",
-    urbanFitScore: 95,
-    lifestyleFitScore: 95,
-    commutingMinutes: 12,
-    routeDescription: "12 นาที เดิน (ย่านอารีย์)",
-    monthlyTravelCostBaht: 0,
-    perTripCostBaht: 0,
-    salaryBaht: 32000,
-    monthlyCommuteCostBaht: 0,
-    transitSegments: [{ mode: "Walk", minutes: 12 }],
-    commuteFitScore: 98,
-    skillFitScore: 85,
-    workModel: "Hybrid",
-    location: { lat: 13.7797, lng: 100.5448 }, // ย่านอารีย์ (ใกล้ BTS)
-  },
-  {
-    id: "j2",
-    title: "Junior Data Analyst",
-    company: "DataSphere Tech",
-    urbanFitScore: 88,
-    lifestyleFitScore: 88,
-    commutingMinutes: 18,
-    routeDescription: "18 นาที ผ่าน วิน + MRT (ย่านสาทร)",
-    monthlyTravelCostBaht: 1540,
-    perTripCostBaht: 35,
-    salaryBaht: 28000,
-    monthlyCommuteCostBaht: 1540,
-    transitSegments: [
-      { mode: "Win", minutes: 3 },
-      { mode: "MRT", minutes: 15 },
-    ],
-    commuteFitScore: 88,
-    skillFitScore: 91,
-    workModel: "On-site",
-    location: { lat: 13.7205, lng: 100.5286 }, // ย่านสาทร
-  },
-  {
-    id: "j3",
-    title: "Data Analyst",
-    company: "Global Analytics",
-    urbanFitScore: 45,
-    lifestyleFitScore: 45,
-    commutingMinutes: 105, // "1 ชม. 45 นาที" — outside the default 20-min tolerance
-    routeDescription: "1 ชม. 45 นาที ผ่าน BTS + เรือ (ย่านบางนา)",
-    monthlyTravelCostBaht: 3800,
-    perTripCostBaht: 90,
-    salaryBaht: 40000,
-    monthlyCommuteCostBaht: 3960,
-    transitSegments: [
-      { mode: "BTS", minutes: 60 },
-      { mode: "Walk", minutes: 45 },
-    ],
-    commuteFitScore: 45,
-    skillFitScore: 74,
-    workModel: "On-site",
-    location: { lat: 13.669, lng: 100.605 }, // ย่านบางนา
-  },
-];
-
-/** Sample candidate home coordinate (ย่านอารีย์-ish) for the routed screen. */
-const sampleHome: Coordinate = { lat: 13.7745, lng: 100.5392 };
+const DEFAULT_HOME: Coordinate = { lat: 13.7745, lng: 100.5392 };
 
 export interface JobDiscoveryScreenProps {
   /**
-   * The jobs to display. Optional so the routed screen (rendered with no props)
-   * shows real sample content; tests pass their own dataset. The screen
-   * filters and orders this list internally — callers pass the raw,
-   * unordered set.
+   * Optional explicit job list. When provided, it is rendered directly and
+   * the live `useJobSearch` fetch is bypassed (backward compatibility for
+   * callers that already have a job list). When omitted (the routed,
+   * no-props case), jobs are sourced from the live `useJobSearch(home,
+   * toleranceMinutes)` hook. The screen filters and orders this list
+   * internally — callers pass the raw, unordered set.
    */
   jobs?: Job[];
   /**
    * Candidate home/residence coordinate; null/invalid renders the
-   * home-not-set state on the map (Req 7.2). Optional so the routed screen
-   * shows real sample content.
+   * home-not-set state on the map (Req 7.2) and, while sourcing from the
+   * live hook, suppresses Search_Request issuance (Req 1.6, 1.7). Defaults
+   * to `DEFAULT_HOME` when omitted.
    */
   home?: Coordinate | null;
   /**
@@ -163,8 +110,8 @@ export interface JobDiscoveryScreenProps {
  * Job Discovery screen composition + interaction state.
  */
 export function JobDiscoveryScreen({
-  jobs = sampleJobs,
-  home = sampleHome,
+  jobs: jobsProp,
+  home = DEFAULT_HOME,
   initialToleranceMinutes = TOLERANCE_TARGET,
 }: JobDiscoveryScreenProps = {}) {
   // --- Owned interaction state -------------------------------------------
@@ -180,46 +127,37 @@ export function JobDiscoveryScreen({
     null,
   );
 
+  // Whether the routed, live-data path is active for this render. When an
+  // explicit `jobs` prop is supplied, the hook is still called (Rules of
+  // Hooks require it to run unconditionally) but is fed a `null` home so its
+  // own validation gate (Req 1.5-1.7) never issues a Search_Request —
+  // bypassing the live fetch for that call.
+  const usingLiveSearch = jobsProp === undefined;
+  const { jobs: liveJobs, status: liveStatus, retry } = useJobSearch(
+    usingLiveSearch ? home : null,
+    toleranceMinutes,
+  );
+
+  // --- Job source (Req 1.1, 1.2, 6.1) --------------------------------------
+  // Live jobs come straight from `useJobSearch` — no client-side
+  // commute-boundary gate is applied to them (Req 6.1). An explicit `jobs`
+  // prop always wins and is treated as already-successful (Req backward
+  // compatibility note above).
+  const jobs = usingLiveSearch ? liveJobs : jobsProp;
+  const status: SearchStatus = usingLiveSearch ? liveStatus : "success";
+
   // --- Map pins pipeline ---------------------------------------------------
-  // Rebuilds synchronously whenever `jobs`, `home`, or `toleranceMinutes`
-  // change so the isochrone redraw + pin re-evaluation stays within the
-  // 1s/500ms budgets (Req 7.4, 8.4). Jobs outside the isochrone (or with an
-  // invalid/missing coordinate) never appear as pins (Req 8.1-8.4). Note:
-  // `TransitMap` also derives an isochrone-filtered pin set internally from
-  // its own `home`/`toleranceMinutes` props (task 11.5) — passing the
-  // already-filtered `isochronePins` here is a harmless superset/no-op for
-  // that internal filter, and keeps the screen's derivation explicit per
-  // the design's data-flow contract.
-  const isochronePins = useMemo(() => {
-    if (!isValidCoordinate(home)) {
-      return [];
-    }
-    // Hard threshold (Req: strict filter logic) applies to map pins too —
-    // a job whose commute time exceeds `toleranceMinutes` never appears as a
-    // pin, even if its coordinate falls inside the isochrone's geometric
-    // approximation.
-    return filterJobsByIsochrone(
-      filterByTolerance(jobs, toleranceMinutes),
-      buildIsochrone(home, toleranceMinutes),
-    );
-  }, [jobs, home, toleranceMinutes]);
+  // Every job is a map pin candidate; `TransitMap` plots one pin per job
+  // with a valid `location` — no commute-boundary gate (Req 6.1, 6.2, 6.4).
+  const isochronePins = jobs;
 
   // --- List cards pipeline --------------------------------------------------
-  // Hard threshold (Req: strict filter logic): jobs whose commute time
-  // exceeds `toleranceMinutes` are excluded outright, regardless of viewport
-  // or Commute Fit — the list can never show an out-of-bounds card. Then
-  // filtered by the current map viewport (Req 9.1-9.3), then ordered by
-  // descending Commute Fit with an A→Z tiebreak (Req 9.5). Re-derives
-  // whenever the source jobs, tolerance, or the viewport bounds change.
+  // Restricted to the current map viewport (Req 6.2, 9.1-9.3), then ordered
+  // by descending Commute Fit with an A→Z tiebreak (Req 6.3, 9.5). Re-derives
+  // whenever the live `jobs` or the viewport bounds change.
   const visibleJobs = useMemo(
-    () =>
-      orderByCommuteFit(
-        filterJobsByViewport(
-          filterByTolerance(jobs, toleranceMinutes),
-          viewportBounds,
-        ),
-      ),
-    [jobs, toleranceMinutes, viewportBounds],
+    () => orderByCommuteFit(filterJobsByViewport(jobs, viewportBounds)),
+    [jobs, viewportBounds],
   );
 
   // Single-selection handler shared by the JobList and the map, so the
@@ -248,32 +186,53 @@ export function JobDiscoveryScreen({
         data-testid="discovery-body"
         className="grid min-h-0 flex-1 grid-cols-1 gap-space-md overflow-x-hidden p-space-md lg:grid-cols-[35fr_65fr]"
       >
-        {/* LEFT / primary region: the viewport-filtered + Commute-Fit-ordered
-            job list. JobList renders its own K.jobsEmpty empty-state when
+        {/* LEFT / primary region: while sourcing from the live hook, renders
+            LoadingState/ErrorState/JobList based on `status` (Req 5.1, 5.5,
+            5.6); JobList renders its own K.jobsEmpty empty-state when
             `visibleJobs` is empty (Req 8.5, 9.4). Dark-mode surface token on
             the region background (Req 3.3). */}
         <div
           data-testid="job-list-region"
           className="min-h-0 overflow-y-auto rounded-xl bg-surface-container-low lg:order-1"
         >
-          <JobList
-            jobs={visibleJobs}
-            selectedJobId={selectedJobId}
-            onSelect={handleSelect}
-          />
+          {status === "loading" ? (
+            <LoadingState />
+          ) : status === "error" ? (
+            <ErrorState onRetry={retry} />
+          ) : (
+            <JobList
+              jobs={visibleJobs}
+              selectedJobId={selectedJobId}
+              onSelect={handleSelect}
+            />
+          )}
         </div>
 
         {/*
           RIGHT region: the interactive Transit map. It receives `home` and
-          `toleranceMinutes` directly (its own isochrone-filtered pins derive
-          internally, task 11.5) plus `onViewportSettle`, which updates the
+          `toleranceMinutes` directly (its own pins derive internally from
+          `jobs`, task 12) plus `onViewportSettle`, which updates the
           `viewportBounds` state driving the list pipeline above (Req 9.1).
+          The map region is unaffected by `status` — it always renders the
+          current `jobs`.
+
+          `<main>` (AppShell) is now capped to the viewport height at `lg:`
+          and scrolls its own content internally, so this section's
+          `h-full` is a real, bounded viewport height rather than a value
+          that grows with content. That lets the map region fill its grid
+          row height (`h-full`) and stay fully visible while only the job
+          list region (which keeps its own `overflow-y-auto`) scrolls
+          internally — the map never moves and Leaflet's container never
+          gets resized by page scroll, which is what caused the map to
+          render weirdly (grey/half-loaded tiles) on scroll. Below `lg:` the
+          map keeps stacking under the list (Req 3.2) with its own
+          `min-h-64` floor.
         */}
         <div
           data-testid="map-region"
           role="region"
           aria-label={resolveText(K.mapLegendTitle, strings)}
-          className="min-h-64 rounded-xl bg-surface-container-low lg:order-2"
+          className="min-h-64 rounded-xl bg-surface-container-low lg:order-2 lg:h-full"
         >
           <TransitMap
             jobs={isochronePins}

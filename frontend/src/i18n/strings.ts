@@ -65,6 +65,26 @@ export const strings: I18nTable = {
   [K.workModelOnsite]: { th: "ทำงานที่ออฟฟิศ", default: "On-site" },
   [K.workModelHybrid]: { th: "ไฮบริด", default: "Hybrid" },
   [K.workModelRemote]: { th: "ทำงานทางไกล", default: "Remote" },
+  [K.jobTitleUnavailable]: {
+    th: "ไม่มีชื่อตำแหน่งงาน",
+    default: "Job title unavailable",
+  },
+  [K.companyNameUnavailable]: {
+    th: "ไม่มีชื่อบริษัท",
+    default: "Company name unavailable",
+  },
+  [K.discoveryLoading]: {
+    th: "กำลังค้นหางาน...",
+    default: "Searching for jobs...",
+  },
+  [K.discoveryErrorMessage]: {
+    th: "ไม่สามารถโหลดรายการงานได้ กรุณาลองใหม่",
+    default: "Could not load jobs. Please try again.",
+  },
+  [K.discoveryRetryAction]: {
+    th: "ลองใหม่",
+    default: "Retry",
+  },
 
   // Screen 1 — Map-First Job Discovery (job-discovery-map-first)
   [K.discoveryMapTitle]: {

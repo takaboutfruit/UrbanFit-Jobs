@@ -32,17 +32,10 @@ import { MapContainer, TileLayer, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { T } from "../../components";
 import { K, strings } from "../../i18n";
-import {
-  buildIsochrone,
-  filterByTolerance,
-  filterJobsByIsochrone,
-  isValidCoordinate,
-  resolveText,
-} from "../../domain";
+import { isValidCoordinate, resolveText } from "../../domain";
 import type { Coordinate, Job, MapBounds, TransitLine } from "../../domain";
 import { CompanyPin } from "./CompanyPin";
 import { HomePin } from "./HomePin";
-import { IsochroneOverlay } from "./IsochroneOverlay";
 import { BoundaryLabel } from "./BoundaryLabel";
 import { ViewportWatcher } from "./ViewportWatcher";
 import {
@@ -165,19 +158,10 @@ export function TransitMap({
   const isMobile = useIsMobileViewport();
   const { plottable, unplottableCount } = partitionJobsByCoordinate(jobs);
   const hasNoLocations = plottable.length === 0;
-  // Map pins are filtered by the isochrone (Req 8.1-8.4). When home is unset
-  // `buildIsochrone` returns [] so `filterJobsByIsochrone` yields no pins; the
-  // "home not set" message (below) explains why, and the map still renders
-  // (Req 7.6). Hard threshold (Req: strict filter logic): a job whose
-  // commute time exceeds `toleranceMinutes` never appears as a pin either,
-  // even if its coordinate falls inside the isochrone's geometric
-  // approximation.
-  const isochronePins = isValidCoordinate(home)
-    ? filterJobsByIsochrone(
-        filterByTolerance(plottable, toleranceMinutes),
-        buildIsochrone(home, toleranceMinutes),
-      )
-    : [];
+  // Every job with a valid coordinate gets a pin, regardless of
+  // `toleranceMinutes` — the commute-boundary gate no longer restricts map
+  // pins (Req 6.1, 6.2, 6.4).
+  const isochronePins = plottable;
 
   return (
     <div
@@ -223,13 +207,10 @@ export function TransitMap({
           );
         })}
 
-        {/* Isochrone below the pins; omitted entirely when home is invalid (Req 7.3, 7.6). */}
-        <IsochroneOverlay home={home} toleranceMinutes={toleranceMinutes} />
-
         {/* Home marker; omitted when home is invalid (Req 7.1, 7.2). */}
         <HomePin home={home} />
 
-        {/* Company pins filtered to the isochrone (Req 8.1-8.4); selected one highlighted. */}
+        {/* One pin per job with a valid location (Req 6.1, 6.2, 6.4); selected one highlighted. */}
         {isochronePins.map((job) => (
           <CompanyPin
             key={job.id}

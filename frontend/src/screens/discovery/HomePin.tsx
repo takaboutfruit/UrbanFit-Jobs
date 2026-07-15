@@ -11,9 +11,10 @@
 //     showing the "home not set" message and omitting the Isochrone_Overlay).
 //
 // The visual marker uses a Leaflet `divIcon` (styled HTML, no image assets),
-// mirroring the CompanyPin convention. It uses a distinct class name
-// ("home-pin-marker") so it is visually distinguishable from CompanyPins on
-// the map.
+// mirroring the CompanyPin convention. It renders an off-white circle with a
+// "home" glyph plus a soft pulsing ring behind it ("home-pin-marker" /
+// "home-pin-pulse") so it is unmistakably distinct from the smaller mint/blue
+// CompanyPin dots on the map.
 
 import L from "leaflet";
 import { Marker } from "react-leaflet";
@@ -27,16 +28,24 @@ export interface HomePinProps {
 
 /**
  * Build a lightweight Leaflet `divIcon` for the home pin. Uses its own class
- * name (distinct from `company-pin-marker`) so it renders as a visually
- * distinct marker. No image assets are used.
+ * names (distinct from `company-pin-marker`) — an off-white filled circle
+ * with a "home" glyph plus a soft pulsing ring — so it reads as "the
+ * candidate's residence" at a glance rather than another company pin. No
+ * image assets are used; the glyph is the globally-loaded Material Symbols
+ * Outlined font (Req 1.4).
  */
 export function buildHomePinIcon(): L.DivIcon {
   return L.divIcon({
     className: "home-pin-icon",
-    html: `<span class="home-pin-marker" aria-hidden="true"></span>`,
-    iconSize: [22, 22],
-    iconAnchor: [11, 11],
-    popupAnchor: [0, -11],
+    html: `
+      <span class="home-pin-marker" aria-hidden="true">
+        <span class="home-pin-pulse"></span>
+        <span class="material-symbols-outlined filled home-pin-marker__glyph">home</span>
+      </span>
+    `,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+    popupAnchor: [0, -17],
   });
 }
 

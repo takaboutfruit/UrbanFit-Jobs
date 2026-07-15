@@ -1,0 +1,363 @@
+﻿_id,No.,Line_Code,Status,Station_Code,Station_Name_EN,Station_Name_TH,Latitude,Longitude
+1,1,ARL,1,A1,Suvarnabhumi,สุวรรณภูมิ,13.69790742,100.7522493
+2,2,ARL,0,A10,Don Muang,ดอนเมือง,,
+3,3,ARL,1,A2,Lat Krabang,ลาดกระบัง,13.7278904,100.7486236
+4,4,ARL,1,A3,Ban Thap Chang,บ้านทับช้าง,13.73282618,100.6913061
+5,5,ARL,1,A4,Hua Mak,หัวหมาก,13.73804799,100.6451781
+6,6,ARL,1,A5,Ramkhamhaeng,รามคำแหง,13.74298957,100.6001476
+7,7,ARL,1,A6,Makkasan,มักกะสัน,13.75103218,100.5612032
+8,8,ARL,1,A7,Ratchaprarop,ราชปรารภ,13.75510533,100.5421521
+9,9,ARL,1,A8,Phaya Thai,พญาไท,13.75677853,100.5348391
+10,10,ARL,0,A9,Bang Sue,บางซื่อ,,
+11,11,Blue,1,BL01,Tha Phra,ท่าพระ,13.72969778,100.4741528
+12,12,Blue,1,BL02,Charan 13,จรัญฯ 13,13.7403604,100.4706533
+13,13,Blue,1,BL03,Fai Chai,ไฟฉาย,13.75513012,100.469225
+14,14,Blue,1,BL04,Bang Khun Non,บางขุนนนท์,13.76322858,100.4732075
+15,15,Blue,1,BL05,Bang Yi Khan,บางยี่ขัน,13.77753717,100.485243
+16,16,Blue,1,BL06,Sirindhorn,สิรินธร,13.78406434,100.4934785
+17,17,Blue,1,BL07,Bang Phlat,บางพลัด,13.79255197,100.5050425
+18,18,Blue,1,BL08,Bang O,บางอ้อ,13.79901673,100.5096999
+19,19,Blue,1,BL09,Bang Pho,บางโพ,13.80646721,100.5210402
+20,20,Blue,1,BL10,Tao Poon,เตาปูน,13.80621259,100.530759
+21,21,Blue,1,BL11,Bang Sue,บางซื่อ,13.80312385,100.5391893
+22,22,Blue,1,BL12,Kamphaeng Phet,กำแพงเพชร,13.79809541,100.5475954
+23,23,Blue,1,BL13,Chatuchak Park,สวนจตุจักร,13.80213175,100.5530476
+24,24,Blue,1,BL14,Phahon Yothin,พหลโยธิน ,13.81434869,100.5601448
+25,25,Blue,1,BL15,Lat Phrao,ลาดพร้าว,13.806243,100.5739567
+26,26,Blue,1,BL16,Ratchadaphisek,รัชดาภิเษก,13.79915789,100.5746119
+27,27,Blue,1,BL17,Sutthisan,สุทธิสาร,13.78973963,100.5742003
+28,28,Blue,1,BL18,Huai Khwang,ห้วยขวาง,13.77852705,100.5736394
+29,29,Blue,1,BL19,Thailand Cultural Centre,ศูนย์วัฒธรรมแห่งประเทศไทย,13.76627655,100.5702328
+30,30,Blue,1,BL20,Phra Ram 9,พระราม 9,13.75791625,100.5655452
+31,31,Blue,1,BL21,Phetchaburi,เพชรบุรี,13.74868501,100.5631611
+32,32,Blue,1,BL22,Sukhumvit,สุขุมวิท,13.73855034,100.5614557
+33,33,Blue,1,BL23,Queen Sirikit National ,ศูนย์การประชุมแห่งชาติสิริกิติ์,13.72315611,100.5601051
+34,34,Blue,1,BL24,Khlong Toei,คลองเตย,13.72233526,100.5539195
+35,35,Blue,1,BL25,Lumphini,ลุมพินี,13.72577127,100.5456769
+36,36,Blue,1,BL26,Si Lom,สีลม,13.72926025,100.5365456
+37,37,Blue,1,BL27,Sam Yan,สามย่าน,13.73234822,100.5299815
+38,38,Blue,1,BL28,Hua Lamphong,หัวลำโพง,13.73783973,100.5171627
+39,39,Blue,1,BL29,Wat Mangkon,วัดมังกร,13.74201328,100.5101788
+40,40,Blue,1,BL30,Sam Yot,สามยอด,13.74715729,100.5022257
+41,41,Blue,1,BL31,Sanam Chai,สนามไชย,13.74394426,100.4945866
+42,42,Blue,1,BL32,Itsaraphap,อิสรภาพ,13.73832048,100.4852921
+43,43,Blue,1,BL33,Bang Phai,บางไผ่,13.72459435,100.4651747
+44,44,Blue,1,BL34,Bang Wa,บางหว้า,13.72039546,100.4571675
+45,45,Blue,1,BL35,Phetkasem 48,เพชรเกษม 48,13.71550917,100.4456044
+46,46,Blue,1,BL36,Phasi Charoen,ภาษีเจริญ,13.71288542,100.4341567
+47,47,Blue,1,BL37,Bang Khae,บางแค,13.71194125,100.4223819
+48,48,Blue,1,BL38,Lak Song,หลักสอง,13.7109686,100.4099721
+49,49,Blue,0,BL39,Phutthamonthon 2,พุทธมณฑลสาย 2,,
+50,50,Blue,0,BL40,Thawiwatthana,ทวีวัฒนา,,
+51,51,Blue,0,BL41,Phutthamonthon 3,พุทธมณฑลสาย 3,,
+52,52,Blue,0,BL42,Phutthamonthon 4,พุทธมณฑลสาย 4,,
+53,53,Brown,0,BR01,Nonthaburi Civic Center,ศูนย์ราชการนนทบุรี,,
+54,54,Brown,0,BR02,Ngam Wong Wan 2,งามวงศ์วาน 2 ,,
+55,55,Brown,0,BR03,Ngam Wong Wan 18,งามวงศ์วาน 18,,
+56,56,Brown,0,BR04,Chinnakhet,ชินเขต,,
+57,57,Brown,0,BR05,Bang Khen,บางเขน,,
+58,58,Brown,0,BR06,Ngam Wong Wan 48,งามวงศ์วาน 48,,
+59,59,Brown,0,BR07,Kasetsart University,มหาวิทยาลัยเกษตรศาสตร์,,
+60,60,Brown,0,BR08,Khong Bang Bua,คลองบางบัว,,
+61,61,Brown,0,BR09,Prasert Manukitch – Lat Pla Khao,ประเสริฐมนูกิจ – ลาดปลาเค้า,,
+62,62,Brown,0,BR10,Sena Niwet,เสนานิเวศน์,,
+63,63,Brown,0,BR11,Satri Witthaya 2 School,โรงเรียนสตรีวิทยา 2,,
+64,64,Brown,0,BR12,Kaset Nawamin,เกษตรนวมินทร์,,
+65,65,Brown,0,BR13,Khlong Lamchiak,คลองลำเจียก,,
+66,66,Brown,0,BR14,Nuanchan,นวลจันทร์,,
+67,67,Brown,0,BR15,Nawamin Junction,แยกนวมินทร์,,
+68,68,Brown,0,BR16,Phokaew,โพธิ์แก้ว,,
+69,69,Brown,0,BR17,Inthrarak,อินทรารักษ์,,
+70,70,Brown,0,BR18,Nawaminphirom Park,สวนนวมินทร์ภิรมย์,,
+71,71,Brown,0,BR19,Nationnal Housing Authority,การเคหะแห่งชาติ,,
+72,72,Brown,0,BR20,Yaek Lam Sali,แยกลำสาลี,,
+73,73,Dark green,1,CEN,Siam,สยาม,13.74561143,100.5341474
+74,74,Light green,1,CEN,Siam,สยาม,13.74561143,100.5341474
+75,75,Light green,1,E1,Chit Lom,ชิดลม,13.74408069,100.5430873
+76,76,Light green,1,E10,Bang Chak,บางจาก,13.69673557,100.6052246
+77,77,Light green,1,E11,Punnawithi,ปุณณวิถี,13.68924559,100.6090509
+78,78,Light green,1,E12,Udom Suk,อุดมสุข,13.67991899,100.6095904
+79,79,Light green,1,E13,Bang Na,บางนา,13.66814729,100.6047186
+80,80,Light green,1,E14,Bearing,แบริ่ง,13.66133924,100.6019284
+81,81,Light green,1,E15,Samrong,สำโรง,13.64618067,100.5955061
+82,82,Light green,1,E16,Pu Chao,ปู่เจ้า,13.63724629,100.5920546
+83,83,Light green,1,E17,Chang Erawan,ช้างเอราวัณ,13.62153309,100.5902021
+84,84,Light green,1,E18,Royal Thai Naval Academy,โรงเรียนนายเรือ,13.60845311,100.5949343
+85,85,Light green,1,E19,Pak Nam,ปากน้ำ,13.60211662,100.5971519
+86,86,Light green,1,E2,Phloen Chit,เพลินจิต,13.74305844,100.5490357
+87,87,Light green,1,E20,Srinagarindra,ศรีนครินทร์,13.59205817,100.608983
+88,88,Light green,1,E21,Phraek Sa,แพรกษา,13.58432495,100.607975
+89,89,Light green,1,E22,Sai Luat,สายลวด,13.57771156,100.6054492
+90,90,Light green,1,E23,Kheha,เคหะฯ,13.56766421,100.6077781
+91,91,Light green,0,E24,Sawang Khaniwat,สวางคนิวาส,,
+92,92,Light green,0,E25,Ancient City,เมืองโบราณ,,
+93,93,Light green,0,E26,Srichanpradit,ศรีจันทร์ประดิษฐ์,,
+94,94,Light green,0,E27,Bang Pu,บางปู,,
+95,95,Light green,0,E28,Tamru,ตำหรุ,,
+96,96,Light green,1,E3,Nana,นานา,13.74053723,100.5554754
+97,97,Light green,1,E4,Asok,อโศก,13.73704787,100.5603549
+98,98,Light green,1,E5,Phrom Phong,พร้อมพงศ์,13.73045553,100.5696996
+99,99,Light green,1,E6,Thong Lo,ทองหล่อ,13.72435715,100.5784291
+100,100,Light green,1,E7,Ekkamai,เอกมัย,13.71955685,100.5850876
+101,101,Light green,1,E8,Phra Khanong,พระโขนง,13.71523481,100.5912765
+102,102,Light green,1,E9,On Nut,อ่อนนุช,13.70563696,100.6010277
+103,103,Gold,1,G1,Krung Thon Buri,กรุงธนบุรี,13.72111862,100.5036484
+104,104,Gold,1,G2,Charoen Nakhorn,เจริญนคร,13.72652947,100.5089743
+105,105,Gold,1,G3,Khlong San,คลองสาน,13.73045608,100.5076094
+106,106,Gold,0,G4,Memorial Bridge,สะพานพุทธ,,
+107,107,Grey,0,GY01,Vatcharaphol,วัชรพล,,
+108,108,Grey,0,GY02,Yu Yen,อยู่เย็น,,
+109,109,Grey,0,GY03,Kaset Nawamin,เกษตรนวมินทร์,,
+110,110,Grey,0,GY04,Pradit Manutham 25,ประดิษฐ์มนูญธรรม 25,,
+111,111,Grey,0,GY05,Yothin Phattana,โยธินพัฒนา,,
+112,112,Grey,0,GY06,Lat Phrao 87,ลาดพร้าว 87,,
+113,113,Grey,0,GY07,Sangkhom Songkhro,สังคมสงเคราะห์,,
+114,114,Grey,0,GY08,Lat Phrao 83,ลาดพร้าว 83,,
+115,115,Grey,0,GY09,Si Wara,ศรีวรา,,
+116,116,Grey,0,GY10,Nawa Si,นวศรี,,
+117,117,Grey,0,GY11,Wat Phraram Kao,วัดพระราม 9,,
+118,118,Grey,0,GY12,Petchaburi-Thong Lo,เพชรบุรี-ทองหล่อ,,
+119,119,Grey,0,GY13,Cham Chan,แจ่มจันทร์,,
+120,120,Grey,0,GY14,Thong Lo 10,ทองหล่อ 10,,
+121,121,Grey,0,GY15,Thong Lo,ทองหล่อ,,
+122,122,Grey,0,GY16,Phra Khanong,พระโขนง,,
+123,123,Grey,0,GY17,Ban Kluai Tai,บ้านกล้วยใต้,,
+124,124,Grey,0,GY18,Kluai Namthai,กล้วยน้ำไท,,
+125,125,Grey,0,GY19,Kasem Rat Junction,แยกเกษมราษฎร์,,
+126,126,Grey,0,GY20,Queen Sirikit National Covention Centre,ศูนย์การประชุมแห่งชาติสิริกิติ์,,
+127,127,Grey,0,GY21,Khlong Toei,คลองเตย,,
+128,128,Grey,0,GY22,Ngam Duphli,งามดูพลี,,
+129,129,Grey,0,GY23,Lumpini,ลุมพินี,,
+130,130,Grey,0,GY24,Suan Phlu,สวนพลู,,
+131,131,Grey,0,GY25,Chong Nonsi,ช่องนนทรี,,
+132,132,Grey,0,GY26,Naradhiwas,นราธิวาสฯ,,
+133,133,Grey,0,GY27,Nang Linchi,นางลิ้นจี่,,
+134,134,Grey,0,GY28,Ratchada-Naradhiwas,รัชดา-นราธิวาส,,
+135,135,Grey,0,GY29,Yannawa,ยานนาวา,,
+136,136,Grey,0,GY30,Phra Ram 3,พระรามที่ 3,,
+137,137,Grey,0,GY31,Khlong Phum,คลองภูมิ,,
+138,138,Grey,0,GY32,Khlong Dan,คลองด่าน,,
+139,139,Grey,0,GY33,Sathu Pradit,สาธุประดิษฐ์,,
+140,140,Grey,0,GY34,Phra Ram 9 Bridge,สะพานพระราม 9,,
+141,141,Grey,0,GY35,Charoen Rat,เจริญราษฎร์,,
+142,142,Grey,0,GY36,Charoen Krung,เจริญกรุง,,
+143,143,Grey,0,GY37,Mahaisawan,มไหสวรรย์,,
+144,144,Grey,0,GY38,Talat Phlu,ตลาดพลู,,
+145,145,Grey,0,GY39,Tha Phra,ท่าพระ,,
+146,146,Pink,1,MT01,Impact Muang Thong Thani,อิมแพ็คเมืองทองธานี,,
+147,147,Pink,1,MT02,Muang Thong Thani Lake ,ทะเลสาบเมืองทองธานี,,
+148,148,Light green,1,N1,Ratchathewi,ราชเทวี,13.75207562,100.5315714
+149,149,Light green,1,N10,Phahon Yothin 24,พหลโยธิน 24,13.82403179,100.5663319
+150,150,Light green,1,N11,Ratchayothin,รัชโยธิน,13.82976184,100.569629
+151,151,Light green,1,N12,Sena Nikhom,เสนานิคม,13.83635368,100.573518
+152,152,Light green,1,N13,Kasetsart University,มหาวิทยาลัยเกษตรศาสตร์,13.84237073,100.577111
+153,153,Light green,1,N14,Royal Forest Department,กรมป่าไม้,13.85039048,100.5817693
+154,154,Light green,1,N15,Bang Bua ,บางบัว,13.85597345,100.5851115
+155,155,Light green,1,N16,11th Infantry Regiment ,กรมทหารราบที่ 11,13.86755996,100.5918953
+156,156,Light green,1,N17,Wat Phra Sri Mahathat,วัดพระศรีมหาธาตุ,13.87534903,100.596748
+157,157,Light green,1,N18,Phahon Yothin 59,พหลโยธิน 59,13.88259699,100.600773
+158,158,Light green,1,N19,Sai Yud,สายหยุด,13.88844049,100.604197
+159,159,Light green,1,N2,Phaya Thai,พญาไท,13.75700979,100.5338066
+160,160,Light green,1,N20,Saphan Mai,สะพานใหม่,13.89660637,100.6090666
+161,161,Light green,1,N21,Bhumibol Adulyadej Hospital,โรงพยาบาลภูมิพลอดุลยเดช,13.91070517,100.6173433
+162,162,Light green,1,N22,Royal Thai Air Force Museum,พิพิธภัณฑ์กองทัพอากาศ,13.91794885,100.6216541
+163,163,Light green,1,N23,Yaek Kor Por Aor,แยก คปอ.,13.92502233,100.6259235
+164,164,Light green,1,N24,Khu Khot,คูคต,13.93235302,100.6466286
+165,165,Light green,0,N25,Khlong 3,คลองสาม,,
+166,166,Light green,0,N26,Khlong 4,คลองสี่,,
+167,167,Light green,0,N27,Khlong 5,คลองห้า,,
+168,168,Light green,0,N28,Outer Ring Road - Lam Luk Ka,วงแหวน-ลำลูกกา,,
+169,169,Light green,1,N3,Victory Monument,อนุสาวรีย์ชัยสมรภูมิ,13.7628712,100.5370477
+170,170,Light green,1,N4,Sanam Pao,สนามเป้า,13.77264449,100.5421253
+171,171,Light green,1,N5,Ari,อารีย์,13.77985028,100.5446531
+172,172,Light green,0,N6,Sena Ruam,เสนาร่วม,,
+173,173,Light green,1,N7,Saphan Khwai,สะพานควาย,13.79380459,100.5497505
+174,174,Light green,1,N8,Mo Chit,หมอชิต,13.8027276,100.5538694
+175,175,Light green,1,N9,Ha Yaek Lat Phrao,ห้าแยกลาดพร้าว,13.81641185,100.5619534
+176,176,Orange,0,OR01,Bang Khun Non,บางขุนนนท์,,
+177,177,Orange,0,OR02,Siriraj,ศิริราช,,
+178,178,Orange,0,OR03,Sanam Luang,สนามหลวง,,
+179,179,Orange,0,OR04,Democracy Monument,อนุเสาวรีย์ประชาธิปไตย,,
+180,180,Orange,0,OR05,Lan Luang,หลานหลวง,,
+181,181,Orange,0,OR06,Yommarat,ยมราช,,
+182,182,Orange,0,OR07,Ratchathewi,ราชเทวี,,
+183,183,Orange,0,OR08,Pratunam,ประตูน้ำ,,
+184,184,Orange,0,OR09,Ratchaprarop,ราชปรารภ,,
+185,185,Orange,0,OR10,Din Daeng,ดินแดง,,
+186,186,Orange,0,OR11,Pracha Songkhro,ประชาสงเคราะห์,,
+187,187,Orange,0,OR12,Thailand Cultural Centre,ศูนย์วัฒนธรรมแห่งประเทศไทย,,
+188,188,Orange,0,OR13,MRTA,รฟม.,,
+189,189,Orange,0,OR14,Wat Phraram Kao,วัดพระราม 9,,
+190,190,Orange,0,OR15,Ram Khamhaeng 12,รามคำแหง 12,,
+191,191,Orange,0,OR16,Ram Khamhaeng University,ม.รามคำแหง,,
+192,192,Orange,0,OR17,SAT,กกท.,,
+193,193,Orange,0,OR18,Ram Khamhaeng 34,รามคำแหง 34,,
+194,194,Orange,0,OR19,Yaek Lam Sali ,แยกลำสาลี,,
+195,195,Orange,0,OR20,Si Burapha,ศรีบูรพา,,
+196,196,Orange,0,OR21,Ban Ma,บ้านม้า,,
+197,197,Orange,0,OR22,Sammakon,สัมมากร,,
+198,198,Orange,0,OR23,Nom Klao,น้อมเกล้า,,
+199,199,Orange,0,OR24,Rat Phatthana,ราษฏร์พัฒนา,,
+200,200,Orange,0,OR25,Wat Bang Pheng,วัดบางเพ็ง,,
+201,201,Orange,0,OR26,Kheha Ramkhamhaeng,เคหะรามคำแหง,,
+202,202,Orange,0,OR27,Min Buri,มีนบุรี,,
+203,203,Orange,0,OR28,Yaek Rom Klao ,แยกร่มเกล้า,,
+204,204,Pink,1,PK01,Nonthaburi Civic Center,ศูนย์ราชการนนทบุรี,,
+205,205,Pink,1,PK02,Khae Rai,แคราย,,
+206,206,Pink,1,PK03,Sanambin Nam,สนามบินน้ำ,,
+207,207,Pink,1,PK04,Samakkhi,สามัคคี,,
+208,208,Pink,1,PK05,Royal Irrigation Department,กรมชลประทาน,,
+209,209,Pink,1,PK06,Yaek Pak Kret,แยกปากเกร็ด,,
+210,210,Pink,1,PK07,Pak Kret Bypass,เลี่ยงเมืองปากเกร็ด,,
+211,211,Pink,1,PK08,Chaeng Watthana-Pak Kret 28,แจ้งวัฒนะ-ปากเกร็ด 28,,
+212,212,Pink,1,PK09,Si Rat,ศรีรัช,,
+213,213,Pink,1,PK10,Muang Thong Thani ,เมืองทองธานี ,,
+214,214,Pink,1,PK11,Chaeng Watthana 14,แจ้งวัฒนะ 14,,
+215,215,Pink,1,PK12,Government Complex,ศูนย์ราชการเฉลิมพระเกียรติ,,
+216,216,Pink,1,PK13,National Telecom,โทรคมนาคมแห่งชาติ,,
+217,217,Pink,1,PK14,Lak Si,หลักสี่,,
+218,218,Pink,1,PK15,Rajabhat Phranakorn,ราชภัฏพระนคร,,
+219,219,Pink,1,PK16,Wat Phra Sri Mahathat,วัดพระศรีมหาธาตุ,,
+220,220,Pink,1,PK17,Ram Inthra 3,รามอินทรา 3,,
+221,221,Pink,1,PK18,Lat Pla Khao,ลาดปลาเค้า,,
+222,222,Pink,1,PK19,Ram Inthra Kor Mor 4,รามอินทรา กม. 4,,
+223,223,Pink,1,PK20,Maiyalap,มัยลาภ,,
+224,224,Pink,1,PK21,Vatcharaphol,วัชรพล,,
+225,225,Pink,1,PK22,Ram Inthra Kor Mor 6,รามอินทรา กม. 6,,
+226,226,Pink,1,PK23,Khu Bon,คู้บอน,,
+227,227,Pink,1,PK24,Ram Inthra Kor Mor 9,รามอินทรา กม. 9,,
+228,228,Pink,1,PK25,Outer Ring Road - Ram Inthra,วงแหวนรามอินทรา,,
+229,229,Pink,1,PK26,Nopparat,นพรัตน์,,
+230,230,Pink,1,PK27,Bang Chan,บางชัน,,
+231,231,Pink,1,PK28,Setthabutbamphen,เศรษฐบุตรบำเพ็ญ,,
+232,232,Pink,1,PK29,Min Buri Market,ตลาดมีนบุรี,,
+233,233,Pink,1,PK30,Min Buri,มีนบุรี,,
+234,234,Purple ,1,PP01,Khlong Bang Phai,คลองบางไผ่,13.89253436,100.4082496
+235,235,Purple ,1,PP02,Talad Bang Yai,ตลาดบางใหญ่,13.88112798,100.4092513
+236,236,Purple ,1,PP03,Sam Yaek Bang Yai,สามแยกบางใหญ่,13.87456616,100.4194113
+237,237,Purple ,1,PP04,Bang Phlu,บางพลู,13.87572623,100.4338654
+238,238,Purple ,1,PP05,Bang Rak Yai,บางรักใหญ่,13.87660559,100.4449095
+239,239,Purple ,1,PP06,Bang Rak Noi Tha It,บางรักน้อยท่าอิฐ,13.87479655,100.4559496
+240,240,Purple ,1,PP07,Sai Ma,ไทรม้า,13.87050059,100.4666311
+241,241,Purple ,1,PP08,Phra Nang klao Bridge,สะพานพระนั่งเกล้า,13.8703241,100.4803656
+242,242,Purple ,1,PP09,Yaek Nonthaburi 1,แยกนนทบุรี 1,13.86581435,100.4946124
+243,243,Purple ,1,PP10,Bang Krasor,บางกระสอ,13.86169155,100.504486
+244,244,Purple ,1,PP11,Nonthaburi Civic Center,ศูนย์ราชการนนทบุรี,13.8602065,100.5132428
+245,245,Purple ,1,PP12,Ministry of Public Health,กระทรวงสาธารณสุข,13.84867734,100.5146738
+246,246,Purple ,1,PP13,Yaek Tiwanon,แยกติวานนท์,13.83957886,100.5148801
+247,247,Purple ,1,PP14,Wong Sawang,วงศ์สว่าง,13.83006051,100.5264559
+248,248,Purple ,1,PP15,Bang Son,บางซ่อน,13.82033224,100.5324967
+249,249,Purple ,1,PP16,Tao Poon,เตาปูน,13.80621259,100.530759
+250,250,Purple ,0,PP17,Parliament House,รัฐสภา,,
+251,251,Purple ,0,PP18,Si Yan,ศรีย่าน,,
+252,252,Purple ,0,PP19,Vajira Hospital,วชิรพยาบาล,,
+253,253,Purple ,0,PP20,National Library,หอสมุดแห่งชาติ,,
+254,254,Purple ,0,PP21,Bang Khun Phrom,บางขุนพรม,,
+255,255,Purple ,0,PP22,Democracy Monument,อนุเสาวรีย์ประชาธิปไตย,,
+256,256,Purple ,0,PP23,Sam Yot,สามยอด,,
+257,257,Purple ,0,PP24,Memorial Bridge,สะพานพุทธ,,
+258,258,Purple ,0,PP25,Wongwian Yai,วงเวียนใหญ่,,
+259,259,Purple ,0,PP26,Samre,สำเหร่,,
+260,260,Purple ,0,PP27,Dao Khanong,ดาวคะนอง,,
+261,261,Purple ,0,PP28,Bang Pakaeo,บางปะแก้ว,,
+262,262,Purple ,0,PP29,Bang Pakok,บางปะกอก,,
+263,263,Purple ,0,PP30,Yaek Pracha Uthit,แยกประชาอุทิศ,,
+264,264,Purple ,0,PP31,Rat Burana,ราษฎร์บูรณะ,,
+265,265,Purple ,0,PP32,Phra Pradaeng,พระประแดง,,
+266,266,Purple ,0,PP33,Khru Nai,ครุใน,,
+267,267,Red east,0,RE01,Bang Sue,บางซื่อ,,
+268,268,Red east,0,RE02,Sam Sen,สามเสน,,
+269,269,Red east,0,RE03,Ratchawithi,ราชวิถี,,
+270,270,Red east,0,RE04,Phaya Thai,พญาไท,,
+271,271,Red east,0,RE05,Makkasan,มักกะสัน,,
+272,272,Red east,0,RE06,Ramkhamhaeng,รามคำแหง,,
+273,273,Red east,0,RE07,Hua Mak,หัวหมาก,,
+274,274,Red north,1,RN01,Bang Sue,บางซื่อ,13.80464389,100.5420537
+275,275,Red north,1,RN02,Chatuchak,จตุจักร,13.82652595,100.5493932
+276,276,Red north,1,RN03,Wat Samian Nari,วัดเสมียนนารี,13.84168597,100.5575223
+277,277,Red north,1,RN04,Bang Khen,บางเขน,13.84696561,100.5607408
+278,278,Red north,1,RN05,Thung Song Hong,ทุ่งสองห้อง,13.86020462,100.5673919
+279,279,Red north,1,RN06,Lak Si,หลักสี่,13.88624187,100.5818476
+280,280,Red north,1,RN07,Kan Kheha,การเคหะ ,13.89861755,100.5890021
+281,281,Red north,1,RN08,Don Muang,ดอนเมือง,13.91507215,100.5979559
+282,282,Red north,1,RN09,Lak Hok,หลักหก,13.96583148,100.6053144
+283,283,Red north,1,RN10,Rangsit,รังสิต,13.99065039,100.602157
+284,284,Red north,0,RN11,Khlong Neung,คลองหนึ่ง,,
+285,285,Red north,0,RN12,Bangkok University-Rangsit,มหาวิทยาลัยกรุงเทพฯ-รังสิต,,
+286,286,Red north,0,RN13,Chiang Rak,เชียงราก,,
+287,287,Red north,0,RN14,Thammasat University-Rangsit,มหาวิทยาลัยธรรมศาสตร์-รังสิต,,
+288,288,Red south,0,RS01,Bang Sue,บางซื่อ,,
+289,289,Red south,0,RS02,Sam Sen,สามเสน,,
+290,290,Red south,0,RS03,Ratchawithi,ราชวิถี,,
+291,291,Red south,0,RS04,Yommarat,ยมราช,,
+292,292,Red south,0,RS05,Yossae,ยศเส,,
+293,293,Red south,0,RS06,Hua Lamphong,หัวลำโพง,,
+294,294,Red south,0,RS07,Khlong San,คลองสาน,,
+295,295,Red south,0,RS08,Wongwian Yai ,วงเวียนใหญ่ ,,
+296,296,Red south,0,RS09,Talat Phlu (North),ตลาดพลู (เหนือ),,
+297,297,Red south,0,RS10,Wutthakat,วุฒากาศ,,
+298,298,Red south,0,RS11,Chom Thong,จอมทอง,,
+299,299,Red south,0,RS12,Wat Sai,วัดไทร,,
+300,300,Red south,0,RS13,Wat Sing,วัดสิงห์,,
+301,301,Red south,0,RS14,Bang Bon,บางบอน,,
+302,302,Red south,0,RS15,Rang Sakae,รางสะแก,,
+303,303,Red south,0,RS16,Rang Pho,รางโพธิ์,,
+304,304,Red south,0,RS17,Sam Yaek,สามแยก,,
+305,305,Red south,0,RS18,Phrom Daen,พรมแดน,,
+306,306,Red south,0,RS19,Thung Si Thong,ทุ่งสีทอง,,
+307,307,Red south,0,RS20,Bang Nam Chuet,บางน้ำจืด,,
+308,308,Red south,0,RS21,Khok Khwai,คอกควาย,,
+309,309,Red south,0,RS22,Ekkachai,เอกชัย,,
+310,310,Red south,0,RS23,Maha Chai,มหาชัย,,
+311,311,Red west,1,RW01,Bang Sue,บางซื่อ,13.80464389,100.5420537
+312,312,Red west,1,RW02,Bang Son,บางซ่อน,13.82205892,100.534189
+313,313,Red west,0,RW03,Rama VI Bridge,สะพานพระราม 6,,
+314,314,Red west,0,RW04,Bang Kruai-EGAT,บางกรวย-กฟผ,,
+315,315,Red west,1,RW05,Bang Bamru,บางบำหรุ,13.79170674,100.4776743
+316,316,Red west,1,RW06,Taling Chan,ตลิ่งชัน,13.78934932,100.4400187
+317,317,Red west,0,RW07,Ban Chimpli,บ้านฉิมพลี,,
+318,318,Red west,0,RW08,Kanchanaphisek,กาญจนาภิเษก,,
+319,319,Red west,0,RW09,Sala Thammasop,ศาลาธรรมสพน์,,
+320,320,Red west,0,RW10,Salaya,ศาลายา,,
+321,321,Red west south,0,RWS1,Taling Chan,ตลิ่งชัน,,
+322,322,Red west south,0,RWS2,Taling Chan District Office,สำนักงานเขตตลิ่งชัน,,
+323,323,Red west south,0,RWS3,Bang Khun Non,บางขุนนนท์,,
+324,324,Red west south,0,RWS4,Siriraj,ศิริราช,,
+325,325,Dark green,1,S1,Ratchadamri,ราชดำริ,13.73945684,100.5394348
+326,326,Dark green,1,S10,Talat Phlu,ตลาดพลู,13.71422607,100.4768081
+327,327,Dark green,1,S11,Wutthakat,วุฒากาศ,13.71307476,100.4689102
+328,328,Dark green,1,S12,Bang Wa,บางหว้า,13.72052948,100.457791
+329,329,Dark green,1,S2,Sala Daeng,ศาลาแดง,13.72845579,100.5340886
+330,330,Dark green,1,S3,Chong Nonsi,ช่องนนทรี,13.7237111,100.5294617
+331,331,Dark green,1,S4,Saint Louis,เซนต์หลุยส์,13.72092969,100.5268975
+332,332,Dark green,1,S5,Surasak,สุรศักดิ์,13.71921117,100.5214964
+333,333,Dark green,1,S6,Saphan Taksin,สะพานตากสิน,13.71881539,100.5141108
+334,334,Dark green,1,S7,Krung Thon Buri,กรุงธนบุรี,13.72084312,100.5027149
+335,335,Dark green,1,S8,Wongwian Yai,วงเวียนใหญ่,13.72108781,100.4953148
+336,336,Dark green,1,S9,Pho Nimit,โพธิ์นิมิตร,13.71925298,100.4860682
+337,337,Dark green,1,W1,National Stadium,สนามกีฬาแห่งชาติ,13.7467374,100.529049
+338,338,Yellow,1,YL01,Lat Phrao,ลาดพร้าว,,
+339,339,Yellow,1,YL02,Phawana,ภาวนา,,
+340,340,Yellow,1,YL03,Chok Chai 4,โชคชัย 4 ,,
+341,341,Yellow,1,YL04,Lat Phrao 71,ลาดพร้าว 71,,
+342,342,Yellow,1,YL05,Lat Phrao 83,ลาดพร้าว 83,,
+343,343,Yellow,1,YL06,Mahat Thai,มหาดไทย,,
+344,344,Yellow,1,YL07,Lat Phrao 101,ลาดพร้าว 101,,
+345,345,Yellow,1,YL08,Bang Kapi,บางกะปิ,,
+346,346,Yellow,1,YL09,Yaek Lam Sali,แยกลำสาลี,,
+347,347,Yellow,1,YL10,Si Kritha,ศรีกรีฑา,,
+348,348,Yellow,1,YL11,Hua Mak,หัวหมาก,,
+349,349,Yellow,1,YL12,Kalantan,กลันตัน,,
+350,350,Yellow,1,YL13,Si Nut,ศรีนุช,,
+351,351,Yellow,1,YL14,Srinagarindra 38,ศรีนครินทร์ 38,,
+352,352,Yellow,1,YL15,Suan Luang Rama IX,สวนหลวง ร.9,,
+353,353,Yellow,1,YL16,Si Udom,ศรีอุดม,,
+354,354,Yellow,1,YL17,Si Iam,ศรีเอี่ยม,,
+355,355,Yellow,1,YL18,Si La Salle,ศรีลาซาล,,
+356,356,Yellow,1,YL19,Si Bearing,ศรีแบริ่ง,,
+357,357,Yellow,1,YL20,Si Dan,ศรีด่าน,,
+358,358,Yellow,1,YL21,Si Thepha,ศรีเทพา,,
+359,359,Yellow,1,YL22,Thipphawan,ทิพวัล,,
+360,360,Yellow,1,YL23,Samrong,สำโรง,,
+361,361,Yellow,0,YLEX01,Criminal Court,ศาลอาญา,,
+362,362,Yellow,0,YLEX02,Phahon Yothin 24 ,พหลโยธิน 24,,

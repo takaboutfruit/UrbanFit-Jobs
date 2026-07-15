@@ -79,8 +79,11 @@ export interface Job {
   commuteFitScore: number | null;
   /** 0..100; null = unavailable, shown as fit-unavailable (Req 6.4, 6.7). */
   skillFitScore: number | null;
-  /** Exactly one work model (Req 4.7). */
-  workModel: WorkModel;
+  /**
+   * Work model shown as a Work_Model_Tag; null = Unspecified_Work_Model, when
+   * the backend `work_model` was null or an unrecognized string (Req 4.6, 4.7).
+   */
+  workModel: WorkModel | null;
   /** Company coordinate; null = not plottable on the transit map (Req 8.3). */
   location: Coordinate | null;
 }
