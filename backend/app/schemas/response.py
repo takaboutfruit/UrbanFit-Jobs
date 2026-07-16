@@ -87,10 +87,16 @@ class JobResult(BaseModel):
         transit_segments: Ordered commute legs, or ``None`` when no leg-level
             transit source is available or parsing fails.
         per_trip_cost_baht: Single-trip commute cost in whole baht (non-negative).
-        monthly_commute_cost_baht: Monthly commute cost in whole baht
-            (``per_trip_cost_baht * 2 * 22``, non-negative).
+        monthly_commute_cost_baht: Monthly commute cost in whole baht, derived
+            from ``per_trip_cost_baht * 2 * 22`` and then adjusted by
+            ``work_model`` (``* 0.4`` for ``"Hybrid"``, forced to ``0`` for
+            ``"Remote"``), always non-negative.
         work_model: One of ``"On-site"``, ``"Hybrid"``, ``"Remote"``, or ``None``
-            when the employment type is null, blank, or unmapped.
+            when unavailable/unmapped.
+        years_experience_required: Whole years of required experience, or
+            ``None`` when unavailable.
+        career_growth_index: One of ``"High"``, ``"Medium"``, ``"Stable"``, or
+            ``None`` when unavailable.
     """
 
     job_id: str | None = None
@@ -111,6 +117,8 @@ class JobResult(BaseModel):
     per_trip_cost_baht: int
     monthly_commute_cost_baht: int
     work_model: str | None = None
+    years_experience_required: int | None = None
+    career_growth_index: str | None = None
 
 
 class SearchMeta(BaseModel):

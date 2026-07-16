@@ -60,6 +60,18 @@ class Settings(BaseSettings):
     # Timeout (seconds) applied to each Time_Estimation_Service call.
     time_service_timeout_s: float = 1.5
 
+    # --- Booth Demo Mode (Static Route Cache) ------------------------------
+    # When true, every Time_Estimation_Service call is intercepted and served
+    # from the pre-computed ``booth_route_cache.json`` instead of the live
+    # Google API (see scripts/generate_route_cache.py for the offline
+    # pre-computation step and app.services.booth_cache for the interceptor).
+    # Defaults to false so the live Google API integration is used unless a
+    # deployment explicitly opts into booth mode via the environment.
+    booth_demo_mode: bool = False
+    # Path to the pre-computed route cache JSON. Relative paths are resolved
+    # against the backend/ directory (the parent of app/).
+    booth_route_cache_path: str = "booth_route_cache.json"
+
 
 settings = Settings()
 """Singleton settings instance imported across the application."""

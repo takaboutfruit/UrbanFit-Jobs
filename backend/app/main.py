@@ -7,10 +7,28 @@ Constructs the application and wires in the transport routers. The
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.search import search_router
+from app.services.booth_cache import init_booth_cache
+
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Application startup/shutdown hook.
+
+    Loads the Booth Demo Mode Static Route Cache into memory exactly once at
+    startup (a no-op disk read of an empty dict when
+    ``settings.booth_demo_mode`` is false), so no ``/search`` request ever
+    performs that disk I/O itself.
+    """
+    init_booth_cache()
+    yield
+
 
 app = FastAPI(
     title="Hybrid Routing Search API",
@@ -20,6 +38,7 @@ app = FastAPI(
         "cost using a Hybrid Routing Strategy (exact match near demo origins, "
         "spatial fallback estimation otherwise)."
     ),
+    lifespan=_lifespan,
 )
 
 # Local dev CORS: allows the Vite dev server (default port 5173, plus the

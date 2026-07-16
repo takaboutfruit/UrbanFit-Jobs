@@ -21,9 +21,13 @@ drop the affected records).
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import httpx
 
 from app.config import settings
+from app.schemas.response import TransitSegment
+from app.services.booth_cache import lookup_booth_route
 
 
 class TimeEstimationError(Exception):
@@ -32,6 +36,29 @@ class TimeEstimationError(Exception):
     Covers non-200 HTTP responses, malformed payloads, per-element error
     statuses (an element ``status`` other than ``"OK"``), and timeouts.
     """
+
+
+@dataclass(frozen=True, slots=True)
+class EstimationResult:
+    """One destination's resolved commute estimate.
+
+    Returned by :meth:`TimeEstimationClient.estimate`, aligned to the caller's
+    ``destinations`` order. In Booth Demo Mode a cache miss (or a
+    pre-computed "no route available" entry) yields both fields ``None``
+    rather than raising, per the deterministic cache-fallback contract (see
+    :mod:`app.services.booth_cache`). On the live Google API path
+    ``transit_segments`` is always ``None`` (Distance Matrix has no leg-level
+    source), matching the pre-existing behavior.
+
+    Attributes:
+        commute_time_mins: The whole-minute commute duration, or ``None`` on a
+            booth-mode cache miss / resolved no-route.
+        transit_segments: The ordered transit legs, or ``None`` when
+            unavailable (live mode, cache miss, or resolved no-route).
+    """
+
+    commute_time_mins: int | None
+    transit_segments: list[TransitSegment] | None
 
 
 def duration_seconds_to_commute_mins(duration_seconds: float) -> int:
@@ -132,6 +159,64 @@ class TimeEstimationClient:
             ) from exc
 
         return self._parse_durations(payload, expected=len(destinations))
+
+    async def estimate(
+        self,
+        origin: tuple[float, float],
+        destinations: list[tuple[float, float]],
+    ) -> list[EstimationResult]:
+        """Resolve commute estimates for each destination, booth-aware.
+
+        This is the entry point strategies should call going forward: it
+        transparently routes to the pre-computed Static Route Cache when
+        ``settings.booth_demo_mode`` is true, and to the existing live Google
+        Distance Matrix path (:meth:`estimate_durations`) otherwise. The live
+        path is untouched by this method -- it is called as-is and its
+        results are simply wrapped with ``transit_segments=None`` (Distance
+        Matrix has no leg-level source, matching pre-existing behavior).
+
+        Booth Demo Mode (Property: interceptor + deterministic fallback):
+            Every destination is looked up in the in-memory booth cache via
+            :func:`~app.services.booth_cache.lookup_booth_route`. No live API
+            call is made under any circumstances while booth mode is active,
+            including on a cache miss -- a miss is logged
+            (``"BOOTH CACHE MISS: <key>"``) and resolves to
+            ``EstimationResult(None, None)`` for that destination rather than
+            falling back to the live API or raising.
+
+        Args:
+            origin: The user's ``(latitude, longitude)`` coordinates.
+            destinations: Up to 25 company ``(latitude, longitude)``
+                coordinates.
+
+        Returns:
+            A list of :class:`EstimationResult`, aligned to ``destinations``
+            order.
+
+        Raises:
+            TimeEstimationError: Only on the live (non-booth) path; see
+                :meth:`estimate_durations`. Never raised in booth mode.
+            ValueError: If more than 25 destinations are supplied (live path
+                only; booth mode has no such limit but callers still respect
+                it upstream).
+        """
+        if settings.booth_demo_mode:
+            results: list[EstimationResult] = []
+            for destination in destinations:
+                route = lookup_booth_route(origin, destination)
+                results.append(
+                    EstimationResult(
+                        commute_time_mins=route.commute_time_mins,
+                        transit_segments=route.transit_segments,
+                    )
+                )
+            return results
+
+        durations = await self.estimate_durations(origin, destinations)
+        return [
+            EstimationResult(commute_time_mins=d, transit_segments=None)
+            for d in durations
+        ]
 
     @staticmethod
     def _format_coord(coord: tuple[float, float]) -> str:

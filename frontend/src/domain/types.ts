@@ -86,7 +86,14 @@ export interface Job {
   workModel: WorkModel | null;
   /** Company coordinate; null = not plottable on the transit map (Req 8.3). */
   location: Coordinate | null;
+  /** Whole years of required experience; null = unavailable. */
+  yearsExperienceRequired: number | null;
+  /** One of "High" | "Medium" | "Stable"; null = unavailable/unmapped. */
+  careerGrowthIndex: CareerGrowthIndex | null;
 }
+
+/** Career growth indicator shown alongside years of experience on a Job Card. */
+export type CareerGrowthIndex = "High" | "Medium" | "Stable";
 
 /** Transit line kind; each type renders with a visually distinct style (Req 5.4). */
 export type TransitLineType = "BTS" | "MRT" | "BRT";

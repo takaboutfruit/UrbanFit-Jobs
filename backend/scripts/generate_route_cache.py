@@ -1,20 +1,29 @@
 """Offline pre-computation of booth-demo transit routes (Static Route Cache).
 
 Standalone script -- NOT part of the running FastAPI app and NOT wired into
-``GET /search``. It pre-computes Google Directions transit routes between a
-handful of hardcoded demo origins (candidate home locations for the booth) and
-every ``Company`` location in the database, then writes the results to
+``GET /search``. It pre-computes transit routes between a handful of
+hardcoded demo origins (candidate home locations for the booth) and every
+``Company`` location in the database, then writes the results to
 ``backend/booth_route_cache.json`` for O(1) lookup at demo time. This avoids
-live Google Directions API cost/latency during the actual booth demo.
+live Google Routes API cost/latency during the actual booth demo.
+
+Uses the **Routes API** (``computeRoutes``), NOT the legacy Directions API.
+The legacy ``maps.googleapis.com/maps/api/directions/json`` endpoint returns
+``REQUEST_DENIED`` on Cloud projects created after the legacy APIs were
+deprecated ("You're calling a legacy API, which is not enabled for your
+project"), which this script previously mis-cached as "no route available"
+for every single pair. The Routes API is the current, supported replacement:
+https://developers.google.com/maps/documentation/routes/transit-route
 
 Data flow:
 1. Load ``DEMO_ORIGINS`` (1-3 hardcoded lat/lng pairs).
 2. Query all ``Company`` rows via the existing async SQLAlchemy session
    (``app.db.session``), reusing the app's ``DATABASE_URL`` configuration.
-3. For every (demo origin, company) pair, call the Google Directions API with
-   ``mode=transit`` and ``departure_time`` set to next Monday 08:00 local time
-   (typical morning rush hour), with retries on 5xx and a mandatory sleep
-   between calls to respect QPS limits.
+3. For every (demo origin, company) pair, POST to
+   ``routes.googleapis.com/directions/v2:computeRoutes`` with
+   ``travelMode="TRANSIT"`` and ``departureTime`` set to next Monday 08:00
+   Bangkok time (typical morning rush hour, converted to UTC/RFC3339), with
+   retries on 5xx and a mandatory sleep between calls to respect QPS limits.
 4. Extract total transit duration (minutes) and step-level segments mapped to
    ``{"mode": ..., "minutes": ...}`` (matching the frontend ``TransitSegment``
    schema).
@@ -28,7 +37,8 @@ Usage (from the ``backend/`` directory, with ``backend/.env`` configured):
     python -m scripts.generate_route_cache
 
 Required environment variables (see ``backend/.env``):
-    GOOGLE_API_KEY   -- API key enabled for the Google Directions API.
+    GOOGLE_API_KEY   -- API key with the **Routes API** enabled (Google Cloud
+                        Console > APIs & Services > Library > "Routes API").
     DATABASE_URL     -- Async SQLAlchemy URL (reused from app.config/.env).
 """
 
@@ -39,7 +49,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -62,12 +72,30 @@ from sqlalchemy import select  # noqa: E402
 
 from app.db.session import async_session_factory  # noqa: E402
 from app.models import Company  # noqa: E402
+from app.services.booth_cache import build_cache_key  # noqa: E402
 
 # --- Configuration ----------------------------------------------------
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
-GOOGLE_DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json"
+GOOGLE_ROUTES_COMPUTE_URL = "https://routes.googleapis.com/directions/v2:computeRoutes"
+# Field mask requesting only what we extract: total duration plus each step's
+# travel mode, static (schedule-independent) duration, and transit line/vehicle
+# details when the step is a TRANSIT leg. Routes API requires an explicit field
+# mask -- there is no default field set (unlike the legacy Directions API).
+GOOGLE_FIELD_MASK = (
+    "routes.duration,"
+    "routes.legs.steps.travelMode,"
+    "routes.legs.steps.staticDuration,"
+    "routes.legs.steps.transitDetails.transitLine.vehicle,"
+    "routes.legs.steps.transitDetails.transitLine.nameShort,"
+    "routes.legs.steps.transitDetails.transitLine.name"
+)
 OUTPUT_PATH = _BACKEND_ROOT / "booth_route_cache.json"
+
+# Bangkok has no DST; a fixed UTC+7 offset avoids a dependency on the tzdata
+# package (zoneinfo's "Asia/Bangkok" is unavailable on some Windows Python
+# installs without the optional tzdata wheel installed).
+_BANGKOK_UTC_OFFSET = timezone(timedelta(hours=7))
 
 # Mandatory pause between Directions API calls to respect Google's QPS limits.
 REQUEST_SLEEP_S = 1.5
@@ -77,7 +105,11 @@ RETRY_BACKOFF_S = 2.0
 
 # Candidate home locations for the booth demo (1-3 hardcoded lat/lng pairs).
 # Replace with the actual candidate's real home coordinates before the demo.
+# (13.7745, 100.5392) matches the frontend's DEFAULT_HOME
+# (frontend/src/screens/JobDiscoveryScreen.tsx) so the booth demo cache covers
+# the coordinate the app actually loads with by default.
 DEMO_ORIGINS: list[tuple[float, float]] = [
+    (13.7745, 100.5392),  # Frontend default home (ย่านอารีย์-ish)
     (13.7563, 100.5018),  # Siam / central Bangkok
     (13.7300, 100.5750),  # On Nut area
     (13.8000, 100.5500),  # Chatuchak area
@@ -85,13 +117,14 @@ DEMO_ORIGINS: list[tuple[float, float]] = [
 
 
 def _next_monday_8am() -> datetime:
-    """Return the local datetime for next Monday at 08:00 (morning rush hour).
+    """Return next Monday 08:00 Bangkok time (typical morning rush hour) as
+    a timezone-aware ``datetime`` (UTC+7, no DST in Thailand).
 
     If today is already Monday, rolls forward to *next* Monday (7 days out)
     rather than today, since the cache is meant to represent a typical future
     commute, not one that may already be in the past today.
     """
-    now = datetime.now()
+    now = datetime.now(_BANGKOK_UTC_OFFSET)
     days_ahead = (7 - now.weekday()) % 7  # Monday == weekday() 0
     if days_ahead == 0:
         days_ahead = 7
@@ -100,37 +133,77 @@ def _next_monday_8am() -> datetime:
 
 
 def _cache_key(origin: tuple[float, float], destination: tuple[float, float]) -> str:
-    """Build the ``"origin_lat,origin_lng_company_lat,company_lng"`` cache key."""
-    return f"{origin[0]},{origin[1]}_{destination[0]},{destination[1]}"
+    """Build the ``"origin_lat,origin_lng_company_lat,company_lng"`` cache key.
+
+    Delegates to :func:`app.services.booth_cache.build_cache_key`, the single
+    source of truth for the key format, so the writer here (Phase 1) and the
+    Phase 2 interceptor reader can never disagree on rounding/formatting.
+    """
+    return build_cache_key(origin, destination)
+
+
+def _parse_iso_seconds(value: str | None) -> float:
+    """Parse a Routes API duration string like ``"1020s"`` into seconds.
+
+    Returns ``0.0`` for ``None``/malformed input rather than raising, since a
+    missing per-step duration should not abort extraction of the rest of the
+    route.
+    """
+    if not value or not value.endswith("s"):
+        return 0.0
+    try:
+        return float(value[:-1])
+    except ValueError:
+        return 0.0
 
 
 def _fetch_directions(
     origin: tuple[float, float],
     destination: tuple[float, float],
-    departure_ts: int,
+    departure_time_rfc3339: str,
 ) -> dict[str, Any] | None:
-    """Call the Google Directions API for one origin/destination transit route.
+    """Call the Routes API ``computeRoutes`` for one transit origin/destination.
 
     Retries on 5xx responses and network errors with linear backoff, up to
     ``MAX_RETRIES`` attempts. Returns the parsed JSON payload for any
-    successfully received (2xx/4xx) response -- including a Google-side
-    ``status`` of ``"ZERO_RESULTS"``, which the caller distinguishes from a
-    hard failure. Returns ``None`` only when the call could not be completed
-    at all (retries exhausted, or a non-retryable transport error), so the
+    successfully received response, including HTTP 200 with an empty ``{}``
+    body -- the Routes API's way of saying no route was found (no top-level
+    ``status`` field the way the legacy Directions API had one), which the
+    caller distinguishes from a hard failure. A non-2xx response (e.g. 400
+    ``INVALID_ARGUMENT`` or 403 ``PERMISSION_DENIED`` for an API/billing
+    misconfiguration) is treated as a hard failure and logged with the
+    response body so a misconfigured project is diagnosable immediately
+    rather than silently cached as "no route" for every pair. Returns
+    ``None`` only when the call could not be completed at all (retries
+    exhausted, a non-retryable transport error, or a non-2xx status), so the
     caller knows to leave that pair out of the cache and retry it on a
     subsequent run instead of permanently recording it as "no route".
     """
-    params = {
-        "origin": f"{origin[0]},{origin[1]}",
-        "destination": f"{destination[0]},{destination[1]}",
-        "mode": "transit",
-        "departure_time": departure_ts,
-        "key": GOOGLE_API_KEY,
+    body = {
+        "origin": {
+            "location": {
+                "latLng": {"latitude": origin[0], "longitude": origin[1]}
+            }
+        },
+        "destination": {
+            "location": {
+                "latLng": {"latitude": destination[0], "longitude": destination[1]}
+            }
+        },
+        "travelMode": "TRANSIT",
+        "departureTime": departure_time_rfc3339,
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": GOOGLE_API_KEY,
+        "X-Goog-FieldMask": GOOGLE_FIELD_MASK,
     }
 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            response = requests.get(GOOGLE_DIRECTIONS_URL, params=params, timeout=10)
+            response = requests.post(
+                GOOGLE_ROUTES_COMPUTE_URL, json=body, headers=headers, timeout=10
+            )
         except requests.RequestException as exc:
             print(f"    request error (attempt {attempt}/{MAX_RETRIES}): {exc}")
             time.sleep(RETRY_BACKOFF_S * attempt)
@@ -145,7 +218,10 @@ def _fetch_directions(
             continue
 
         if response.status_code != 200:
-            print(f"    non-200 status {response.status_code}, giving up on this pair")
+            print(
+                f"    non-200 status {response.status_code}, giving up on "
+                f"this pair. Body: {response.text[:500]}"
+            )
             return None
 
         try:
@@ -158,16 +234,44 @@ def _fetch_directions(
     return None
 
 
-def _extract_route(payload: dict[str, Any]) -> dict[str, Any] | None:
-    """Extract ``{"duration_mins", "segments"}`` from a Directions payload.
+def merge_consecutive_segments(
+    raw_segments: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Collapse consecutive same-mode legs into one summed segment.
 
-    Returns ``None`` when Google reports no usable route (top-level status
-    other than ``"OK"``, or no routes/legs present) -- callers cache this as
-    ``null`` per the task's "no route available" handling.
+    The Routes API reports every individual walking maneuver (e.g. "walk to
+    the corner", "walk across the street", "walk to the platform") as its own
+    step, so a single real-world walking leg can arrive as 5-10 raw ``WALK``
+    steps in a row. Rendering each one as a separate Transit_Chain_Row
+    segment overflowed the Job_Card (a dozen tiny icon+duration pairs per
+    job). This merges any run of consecutive segments sharing the same
+    ``mode`` label into a single segment whose ``minutes`` is their sum,
+    preserving overall order -- so "Walk 2 + Walk 3 + Walk 1" becomes one
+    "Walk 6" segment, while a transit leg sandwiched between two walk runs
+    still produces exactly 3 segments (walk, transit, walk).
     """
-    if payload.get("status") != "OK":
-        return None
+    merged: list[dict[str, Any]] = []
+    for seg in raw_segments:
+        if merged and merged[-1]["mode"] == seg["mode"]:
+            merged[-1]["minutes"] += seg["minutes"]
+        else:
+            merged.append(dict(seg))
+    return merged
 
+
+def _extract_route(payload: dict[str, Any]) -> dict[str, Any] | None:
+    """Extract ``{"duration_mins", "segments"}`` from a computeRoutes payload.
+
+    Returns ``None`` when Google reports no usable route -- an empty ``{}``
+    body, no ``routes`` array, or no legs -- which callers cache as ``null``
+    per the task's "no route available" handling.
+
+    Consecutive same-mode raw steps (almost always a run of ``WALK``
+    maneuvers) are merged into one summed segment via
+    :func:`merge_consecutive_segments` before being cached, so the cached
+    segment list matches what the Transit_Chain_Row is designed to render
+    (a handful of mode+duration legs, not one per individual walking step).
+    """
     routes = payload.get("routes") or []
     if not routes:
         return None
@@ -176,32 +280,34 @@ def _extract_route(payload: dict[str, Any]) -> dict[str, Any] | None:
     if not legs:
         return None
 
-    leg = legs[0]
-    duration_value = leg.get("duration", {}).get("value")
-    if duration_value is None:
-        return None
-    duration_mins = int(round(duration_value / 60.0))
+    total_duration_s = _parse_iso_seconds(routes[0].get("duration"))
+    duration_mins = int(round(total_duration_s / 60.0))
 
-    segments: list[dict[str, Any]] = []
-    for step in leg.get("steps", []):
-        travel_mode = step.get("travel_mode")
-        step_duration_s = step.get("duration", {}).get("value", 0)
-        step_minutes = int(round(step_duration_s / 60.0))
+    raw_segments: list[dict[str, Any]] = []
+    for leg in legs:
+        for step in leg.get("steps", []):
+            travel_mode = step.get("travelMode")
+            step_duration_s = _parse_iso_seconds(step.get("staticDuration"))
+            step_minutes = int(round(step_duration_s / 60.0))
 
-        if travel_mode == "TRANSIT":
-            transit_details = step.get("transit_details") or {}
-            line = transit_details.get("line") or {}
-            vehicle = line.get("vehicle") or {}
-            mode_label = (
-                vehicle.get("name")
-                or vehicle.get("type")
-                or line.get("short_name")
-                or "Transit"
-            )
-        else:
-            mode_label = travel_mode.capitalize() if travel_mode else "Unknown"
+            if travel_mode == "TRANSIT":
+                transit_details = step.get("transitDetails") or {}
+                line = transit_details.get("transitLine") or {}
+                vehicle = line.get("vehicle") or {}
+                vehicle_name = vehicle.get("name") or {}
+                mode_label = (
+                    vehicle_name.get("text")
+                    or vehicle.get("type")
+                    or line.get("nameShort")
+                    or line.get("name")
+                    or "Transit"
+                )
+            else:
+                mode_label = travel_mode.capitalize() if travel_mode else "Unknown"
 
-        segments.append({"mode": mode_label, "minutes": step_minutes})
+            raw_segments.append({"mode": mode_label, "minutes": step_minutes})
+
+    segments = merge_consecutive_segments(raw_segments)
 
     return {"duration_mins": duration_mins, "segments": segments}
 
@@ -254,10 +360,15 @@ async def main() -> None:
     print(f"Loaded {len(companies)} valid company location(s) from the database.")
 
     departure_dt = _next_monday_8am()
-    departure_ts = int(departure_dt.timestamp())
+    # Routes API requires RFC3339 UTC "Zulu" format, e.g. "2026-07-20T01:00:00Z".
+    departure_rfc3339 = (
+        departure_dt.astimezone(timezone.utc)
+        .isoformat(timespec="seconds")
+        .replace("+00:00", "Z")
+    )
     print(
-        f"Using transit departure_time = {departure_dt.isoformat()} "
-        f"(epoch {departure_ts})"
+        f"Using transit departureTime = {departure_dt.isoformat()} "
+        f"({departure_rfc3339})"
     )
 
     cache = _load_existing_cache()
@@ -285,7 +396,7 @@ async def main() -> None:
                 f"[{pair_index}/{total_pairs}] origin={origin} "
                 f"company_id={company_id} dest={destination}"
             )
-            payload = _fetch_directions(origin, destination, departure_ts)
+            payload = _fetch_directions(origin, destination, departure_rfc3339)
 
             if payload is None:
                 # Hard failure (retries exhausted / transport error): do NOT

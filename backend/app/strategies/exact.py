@@ -122,11 +122,17 @@ class ExactMatchStrategy:
         # (Property 4; Requirements 2.4, 2.9). Never surfaces a 502.
         fare_by_company: dict[int, float] = {}
         time_by_company: dict[int, int] = {}
+        segments_by_company: dict[int, list | None] = {}
         if candidates:
             origin = (query.lat, query.lng)
             destinations = [(c.latitude, c.longitude) for c in candidates]
             try:
-                commute_mins = await self._time_client.estimate_durations(
+                # ``estimate`` transparently routes to the Booth Demo Mode
+                # Static Route Cache when active, or the live Google API
+                # otherwise; TimeEstimationError can only be raised on the
+                # live path (booth mode never raises, it resolves misses to
+                # None per-destination instead).
+                estimates = await self._time_client.estimate(
                     origin, destinations
                 )
             except TimeEstimationError:
@@ -134,10 +140,16 @@ class ExactMatchStrategy:
                 candidates = []
             else:
                 fare_by_company = {c.company_id: c.fare_thb for c in candidates}
-                time_by_company = {
-                    c.company_id: commute_mins[i]
-                    for i, c in enumerate(candidates)
-                }
+                for candidate, result in zip(candidates, estimates):
+                    if result.commute_time_mins is None:
+                        # Booth-mode cache miss/no-route: not estimable.
+                        continue
+                    time_by_company[candidate.company_id] = (
+                        result.commute_time_mins
+                    )
+                    segments_by_company[candidate.company_id] = (
+                        result.transit_segments
+                    )
 
         # (query 3) ONE combined set-based fetch covering the demo company AND
         # the surviving fallback candidates. The demo company id is listed first
@@ -187,6 +199,7 @@ class ExactMatchStrategy:
                     company_name=row.company_name,
                     company_lat=row.company_lat,
                     company_lng=row.company_lng,
+                    transit_segments=segments_by_company.get(company_id),
                 )
             )
 

@@ -16,7 +16,10 @@ SQL by :func:`~app.db.repository.select_fallback_candidates`):
    ``company_id`` from the pool so its jobs are priced exactly, not estimated.
 3. Call the Time_Estimation_Service once for the whole pool (<= 25 destinations),
    obtaining whole-minute commute times aligned to candidate order (Property 9;
-   Requirements 3.8, 3.9).
+   Requirements 3.8, 3.9). In Booth Demo Mode this call is transparently served
+   from the pre-computed Static Route Cache instead of the live Google API
+   (see :mod:`app.services.booth_cache`); a company whose pair is a cache miss
+   or has no pre-computed route is dropped from the pool for this request.
 4. Fetch the candidate companies' jobs in a single set-based query.
 5. Build one :class:`PricedJob` per job: fare from its company's computed
    ``fare_thb``, commute time from the estimate for that company,
@@ -104,19 +107,31 @@ class FallbackEstimationStrategy:
         if not candidates:
             return []
 
-        # (3) One batched Time_Estimation_Service call for the whole pool. The
-        # returned durations are whole minutes aligned to candidate order.
+        # (3) One batched Time_Estimation_Service call for the whole pool.
+        # ``estimate`` transparently routes to the Booth Demo Mode Static
+        # Route Cache when active, or the live Google API otherwise. Each
+        # result is aligned to candidate order; ``commute_time_mins`` is
+        # ``None`` only on a booth-mode cache miss/no-route (never on the live
+        # path, which still raises TimeEstimationError as before).
         origin = (query.lat, query.lng)
         destinations = [(c.latitude, c.longitude) for c in candidates]
-        commute_mins = await self._time_client.estimate_durations(
-            origin, destinations
-        )
+        estimates = await self._time_client.estimate(origin, destinations)
 
         # Index pricing and timing by company id for the per-job build below.
+        # A company whose estimate is None (booth cache miss/no-route) is
+        # excluded here rather than carried forward with a null
+        # commute_time_mins, since JobResult.commute_time_mins is a
+        # non-nullable whole-minute field (Requirement 5.4) -- this mirrors
+        # the pre-existing pattern of dropping jobs whose company falls
+        # outside the timed pool.
         fare_by_company = {c.company_id: c.fare_thb for c in candidates}
-        time_by_company = {
-            c.company_id: commute_mins[i] for i, c in enumerate(candidates)
-        }
+        time_by_company: dict[int, int] = {}
+        segments_by_company: dict[int, list | None] = {}
+        for candidate, result in zip(candidates, estimates):
+            if result.commute_time_mins is None:
+                continue
+            time_by_company[candidate.company_id] = result.commute_time_mins
+            segments_by_company[candidate.company_id] = result.transit_segments
 
         # (4) Fetch all candidate companies' jobs in a single set-based query.
         company_ids = [c.company_id for c in candidates]
@@ -145,6 +160,7 @@ class FallbackEstimationStrategy:
                     company_name=row.company_name,
                     company_lat=row.company_lat,
                     company_lng=row.company_lng,
+                    transit_segments=segments_by_company.get(company_id),
                 )
             )
 

@@ -18,6 +18,7 @@ export * from "./format-time";
 export * from "./format-tolerance";
 export * from "./format-primary-row";
 export * from "./format-financial";
+export * from "./format-qualifications";
 export * from "./transit-icon";
 export * from "./format-fit";
 export * from "./geo";

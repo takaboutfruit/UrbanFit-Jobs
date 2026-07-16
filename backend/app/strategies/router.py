@@ -57,12 +57,12 @@ from app.schemas.response import (
 from app.services.enrichment import (
     compute_commute_fit,
     compute_skill_fit,
-    derive_work_model,
     monthly_commute_cost_baht,
     normalize_skill_tokens,
     overall_fit_score,
-    parse_transit_segments,
     per_trip_cost_baht,
+    resolve_career_growth_index,
+    resolve_work_model,
 )
 from app.services.time_client import TimeEstimationClient
 from app.strategies.exact import ExactMatchStrategy
@@ -94,6 +94,8 @@ class _EnrichedJob:
     per_trip: int
     monthly: int
     work_model: str | None
+    years_experience_required: int | None
+    career_growth_index: str | None
     transit_segments: list[TransitSegment] | None
     company_name: str | None
     company_location: CompanyLocation | None
@@ -246,9 +248,22 @@ class HybridRouter:
         skill_fit_score = compute_skill_fit(desired_tokens, pj.job.required_skills)
         commute_fit_score = compute_commute_fit(pj.commute_time_mins, max_time)
         per_trip = per_trip_cost_baht(pj.fare_thb)
-        monthly = monthly_commute_cost_baht(per_trip)
-        work_model = derive_work_model(pj.job.employment_type)
-        transit_segments = parse_transit_segments(None)
+        # The explicit work_model column (schema expansion) wins when set to a
+        # recognized value; otherwise falls back to the employment_type
+        # derivation so pre-existing rows keep their prior behavior.
+        work_model = resolve_work_model(pj.job.work_model, pj.job.employment_type)
+        # monthly_commute_cost_baht applies the Hybrid (*0.4) / Remote (->0)
+        # adjustment based on the resolved work_model.
+        monthly = monthly_commute_cost_baht(per_trip, work_model)
+        years_experience_required = pj.job.years_experience_required
+        career_growth_index = resolve_career_growth_index(
+            pj.job.career_growth_index
+        )
+        # No leg-level transit source exists on the live Google Distance
+        # Matrix path (pj.transit_segments is None there, same as before).
+        # In Booth Demo Mode the Static Route Cache can supply real ordered
+        # legs, which flow straight through from PricedJob.
+        transit_segments = pj.transit_segments
         overall = overall_fit_score(commute_fit_score, skill_fit_score)
 
         company_location = HybridRouter._build_company_location(
@@ -262,6 +277,8 @@ class HybridRouter:
             per_trip=per_trip,
             monthly=monthly,
             work_model=work_model,
+            years_experience_required=years_experience_required,
+            career_growth_index=career_growth_index,
             transit_segments=transit_segments,
             company_name=pj.company_name,
             company_location=company_location,
@@ -414,4 +431,6 @@ class HybridRouter:
             per_trip_cost_baht=ej.per_trip,
             monthly_commute_cost_baht=ej.monthly,
             work_model=ej.work_model,
+            years_experience_required=ej.years_experience_required,
+            career_growth_index=ej.career_growth_index,
         )

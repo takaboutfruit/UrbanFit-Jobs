@@ -84,17 +84,17 @@ export function CompanyPin({ job, isSelected, onSelect }: CompanyPinProps) {
           onClick={() => onSelect(job.id)}
           className="flex flex-col gap-space-xs text-left"
         >
-          <span data-testid="pin-title" className="font-semibold text-on-surface">
-            {job.title}
+          <span data-testid="pin-title" className="font-semibold text-[#1A202C]">
+            {job.company}
           </span>
           {job.commutingMinutes === null ? (
             <T
               k={K.commuteUnavailable}
               as="span"
-              className="text-on-surface-variant"
+              className="text-[#1A202C]"
             />
           ) : (
-            <span data-testid="pin-commute" className="text-on-surface-variant">
+            <span data-testid="pin-commute" className="text-[#1A202C]">
               {`${job.commutingMinutes} ${resolveText(K.toleranceUnit, strings)}`}
             </span>
           )}

@@ -99,10 +99,6 @@ export const strings: I18nTable = {
   [K.commuteFitLabel]: { th: "ความเหมาะสมด้านการเดินทาง", default: "Commute Fit" },
   [K.skillFitLabel]: { th: "ความเหมาะสมด้านทักษะ", default: "Skill Fit" },
   [K.fitUnavailable]: { th: "ไม่มีข้อมูล", default: "N/A" },
-  [K.isochroneBoundaryLabel]: {
-    th: "ขอบเขตเดินทาง 20 นาที",
-    default: "20-minute reachable area",
-  },
   [K.homeNotSet]: {
     th: "ยังไม่ได้ตั้งค่าตำแหน่งบ้าน",
     default: "Home location is not set",
@@ -122,6 +118,27 @@ export const strings: I18nTable = {
   },
   [K.commuteFitBadgeLabel]: { th: "การเดินทาง", default: "Commute" },
   [K.skillFitBadgeLabel]: { th: "ทักษะที่ตรง", default: "Skill match" },
+
+  // Screen 1 — Work flexibility badge + qualifications subtitle
+  // (job-card-qualifications)
+  [K.workFlexibilityOnsite]: { th: "ทำงานที่ออฟฟิศ", default: "On-site" },
+  // {days} placeholder: number of work-from-home days per week (Req: "Hybrid
+  // (WFH 3 days)").
+  [K.workFlexibilityHybridTemplate]: {
+    th: "ไฮบริด (WFH {days} วัน)",
+    default: "Hybrid (WFH {days} days)",
+  },
+  [K.workFlexibilityRemote]: { th: "ทำงานทางไกล", default: "Remote" },
+  // {years} and {growth} placeholders, e.g.
+  // "ประสบการณ์ที่ต้องการ: 3 ปี • โอกาสเติบโต: High".
+  [K.qualificationsSubtitleTemplate]: {
+    th: "ประสบการณ์ที่ต้องการ: {years} ปี • โอกาสเติบโต: {growth}",
+    default: "Experience required: {years} years • Growth: {growth}",
+  },
+  [K.careerGrowthHigh]: { th: "สูง", default: "High" },
+  [K.careerGrowthMedium]: { th: "ปานกลาง", default: "Medium" },
+  [K.careerGrowthStable]: { th: "คงที่", default: "Stable" },
+  [K.qualificationsUnavailable]: { th: "ไม่มีข้อมูล", default: "N/A" },
 
   // Transit map
   [K.mapNoLocations]: {

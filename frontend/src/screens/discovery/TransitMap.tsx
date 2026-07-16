@@ -36,7 +36,6 @@ import { isValidCoordinate, resolveText } from "../../domain";
 import type { Coordinate, Job, MapBounds, TransitLine } from "../../domain";
 import { CompanyPin } from "./CompanyPin";
 import { HomePin } from "./HomePin";
-import { BoundaryLabel } from "./BoundaryLabel";
 import { ViewportWatcher } from "./ViewportWatcher";
 import {
   SAMPLE_TRANSIT_LINES,
@@ -150,7 +149,11 @@ export function TransitMap({
   selectedJobId,
   onSelect,
   home,
-  toleranceMinutes,
+  // Accepted for API compatibility with the caller (JobDiscoveryScreen still
+  // passes it), but not read here: this map has never rendered the
+  // IsochroneOverlay component, so nothing inside TransitMap depends on the
+  // tolerance value directly (Req 6.1, 6.2, 6.4).
+  toleranceMinutes: _toleranceMinutes,
   onViewportSettle,
   transitLines = SAMPLE_TRANSIT_LINES,
   className,
@@ -158,9 +161,8 @@ export function TransitMap({
   const isMobile = useIsMobileViewport();
   const { plottable, unplottableCount } = partitionJobsByCoordinate(jobs);
   const hasNoLocations = plottable.length === 0;
-  // Every job with a valid coordinate gets a pin, regardless of
-  // `toleranceMinutes` — the commute-boundary gate no longer restricts map
-  // pins (Req 6.1, 6.2, 6.4).
+  // Every job with a valid coordinate gets a pin, regardless of tolerance —
+  // the commute-boundary gate no longer restricts map pins (Req 6.1, 6.2, 6.4).
   const isochronePins = plottable;
 
   return (
@@ -227,9 +229,6 @@ export function TransitMap({
       </MapContainer>
 
       {/* --- Plain-DOM overlays (always present & queryable) ----------------- */}
-
-      {/* Boundary label anchored on the shaded isochrone area (Req 7.5). */}
-      <BoundaryLabel home={home} />
 
       {/* Home-not-set message; map itself still renders (Req 7.6). */}
       {!isValidCoordinate(home) && (

@@ -49,7 +49,6 @@ export const K = {
   commuteFitLabel: "discovery.mapFirst.commuteFitLabel",
   skillFitLabel: "discovery.mapFirst.skillFitLabel",
   fitUnavailable: "discovery.mapFirst.fitUnavailable",
-  isochroneBoundaryLabel: "discovery.mapFirst.isochroneBoundaryLabel",
   homeNotSet: "discovery.mapFirst.homeNotSet",
   transitModeWalk: "discovery.mapFirst.transitModeWalk",
   transitModeBts: "discovery.mapFirst.transitModeBts",
@@ -62,6 +61,19 @@ export const K = {
   percentOfSalaryLabel: "discovery.mapFirst.percentOfSalaryLabel",
   commuteFitBadgeLabel: "discovery.mapFirst.commuteFitBadgeLabel",
   skillFitBadgeLabel: "discovery.mapFirst.skillFitBadgeLabel",
+
+  // Screen 1 — Work flexibility badge + qualifications subtitle
+  // (job-card-qualifications)
+  workFlexibilityOnsite: "discovery.qualifications.workFlexibility.onsite",
+  workFlexibilityHybridTemplate:
+    "discovery.qualifications.workFlexibility.hybridTemplate",
+  workFlexibilityRemote: "discovery.qualifications.workFlexibility.remote",
+  qualificationsSubtitleTemplate:
+    "discovery.qualifications.subtitleTemplate",
+  careerGrowthHigh: "discovery.qualifications.careerGrowth.high",
+  careerGrowthMedium: "discovery.qualifications.careerGrowth.medium",
+  careerGrowthStable: "discovery.qualifications.careerGrowth.stable",
+  qualificationsUnavailable: "discovery.qualifications.unavailable",
 
   // Transit map
   mapNoLocations: "map.noLocations",

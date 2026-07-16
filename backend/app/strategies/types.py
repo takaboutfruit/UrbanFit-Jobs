@@ -18,6 +18,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.models import JobPosting
+from app.schemas.response import TransitSegment
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,6 +111,11 @@ class PricedJob:
             unavailable. Defaults to ``None``.
         company_lng: The company's longitude in decimal degrees, or ``None`` when
             unavailable. Defaults to ``None``.
+        transit_segments: The ordered leg-level transit segments for this
+            commute, populated only when Booth Demo Mode's Static Route Cache
+            supplied them for a hit; ``None`` on the live Google API path (no
+            leg-level source there) and on a booth cache miss/no-route.
+            Defaults to ``None`` so pre-existing constructors remain valid.
     """
 
     job: JobPosting
@@ -119,3 +125,4 @@ class PricedJob:
     company_name: str | None = None
     company_lat: float | None = None
     company_lng: float | None = None
+    transit_segments: list[TransitSegment] | None = None

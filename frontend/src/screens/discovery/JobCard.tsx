@@ -1,8 +1,10 @@
-// Feature: job-discovery-map-first
+// Feature: job-discovery-map-first, job-card-qualifications
 // Job_Card (task 8.5): composes the Map-First rows in order — a Top_Row
 // (Primary_Row anchored left, Salary_Tag anchored top-right), Transit_Chain_Row,
-// Job_Meta_Row, Financial_Comparison_Row (commute cost only), Fit_Badges —
-// replacing the old single unified fit ring layout.
+// Job_Meta_Row, QualificationsRow (years of experience + career growth),
+// Financial_Comparison_Row (commute cost only), then a bottom row pairing
+// WorkFlexibilityBadge with Fit_Badges — replacing the old single unified
+// fit ring layout.
 //
 // Requirements:
 //   - 4.1: Primary_Row (top-left) shows commuting time + per-trip cost.
@@ -14,6 +16,9 @@
 //     no duplication).
 //   - 6.2: Fit_Badges shows Commute_Fit_Badge left of Skill_Fit_Badge.
 //   - 6.5: no single unified circular fit chart (ProgressRing) is rendered.
+//   - job-card-qualifications: WorkFlexibilityBadge shows the job's work
+//     model (e.g. "Hybrid (WFH 3 days)"); QualificationsRow shows required
+//     years of experience + career growth index.
 //
 // Selection behavior (whole card is a focusable button, aria-pressed /
 // data-selected, selected ring/border treatment) is unrelated to this task
@@ -23,8 +28,10 @@ import { PrimaryRow } from "./PrimaryRow";
 import { SalaryTag } from "./SalaryTag";
 import { TransitChainRow } from "./TransitChainRow";
 import { JobMetaRow } from "./JobMetaRow";
+import { QualificationsRow } from "./QualificationsRow";
 import { FinancialComparisonRow } from "./FinancialComparisonRow";
 import { FitBadges } from "./FitBadges";
+import { WorkFlexibilityBadge } from "./WorkFlexibilityBadge";
 import type { Job } from "../../domain";
 
 export interface JobCardProps {
@@ -80,14 +87,21 @@ export function JobCard({ job, isSelected, onSelect, className }: JobCardProps) 
       </div>
       <TransitChainRow segments={job.transitSegments} />
       <JobMetaRow title={job.title} company={job.company} />
+      <QualificationsRow
+        yearsExperienceRequired={job.yearsExperienceRequired}
+        careerGrowthIndex={job.careerGrowthIndex}
+      />
       <FinancialComparisonRow
         salaryBaht={job.salaryBaht}
         monthlyCommuteCostBaht={job.monthlyCommuteCostBaht}
       />
-      <FitBadges
-        commuteFitScore={job.commuteFitScore}
-        skillFitScore={job.skillFitScore}
-      />
+      <div className="flex flex-wrap items-center gap-space-sm">
+        <WorkFlexibilityBadge workModel={job.workModel} />
+        <FitBadges
+          commuteFitScore={job.commuteFitScore}
+          skillFitScore={job.skillFitScore}
+        />
+      </div>
     </button>
   );
 }

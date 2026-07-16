@@ -344,7 +344,6 @@ async def fetch_jobs_for_companies(
         )
         .join(Company, JobPosting.company_id == Company.id)
         .where(JobPosting.company_id.in_(company_ids))
-        .where(JobPosting.job_title == "Data Analyst")
     )
     result = await db.execute(stmt)
     return [

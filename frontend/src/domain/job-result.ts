@@ -34,6 +34,8 @@ export interface JobResult {
   per_trip_cost_baht: number;
   monthly_commute_cost_baht: number;
   work_model: string | null;
+  years_experience_required: number | null;
+  career_growth_index: string | null;
 }
 
 export interface SearchMeta {

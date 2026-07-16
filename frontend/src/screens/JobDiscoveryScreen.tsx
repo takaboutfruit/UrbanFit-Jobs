@@ -13,8 +13,6 @@
 //                                         initial value is clamped via
 //                                         `clampToleranceStep` (Req 2.8).
 //   - selectedJobId    : string | null  — the single selected job.
-//   - viewportBounds   : MapBounds | null — the current settled map
-//                                         viewport bounds (Req 9.1).
 //
 // Job source (Req 1.1, 1.2, 1.5-1.7, 6.1-6.3): when the screen is rendered
 // without an explicit `jobs` prop (the routed, no-props case), jobs come
@@ -27,12 +25,13 @@
 //   - Map pins: every job with a valid coordinate is passed to `TransitMap`,
 //     which plots one pin per job with a valid `location` — no
 //     commute-boundary gate (Req 6.1, 6.2, 6.4).
-//   - List cards: `orderByCommuteFit(filterJobsByViewport(jobs,
-//     viewportBounds))` — restricted to the current map viewport (so the
-//     list only ever shows what's currently visible on the map, not
-//     off-screen pins), then ordered by descending Commute Fit with an A→Z
-//     tiebreak (Req 9.5, 6.3). `JobList` already renders its own empty-state
-//     (K.jobsEmpty) when given zero cards (Req 8.5, 9.4, 5.5).
+//   - List cards: `orderByCommuteFit(jobs)` — every job the search returned
+//     (already bounded by the tolerance slider via the backend's `max_time`
+//     param) is shown, ordered by descending Commute Fit with an A→Z
+//     tiebreak (Req 9.5, 6.3). The list is intentionally NOT restricted to
+//     the current map viewport: panning/zooming the map must not hide job
+//     cards the user already has results for. `JobList` already renders its
+//     own empty-state (K.jobsEmpty) when given zero cards (Req 8.5, 9.4, 5.5).
 //   - List region status (Req 5.1, 5.5, 5.6): while sourcing from
 //     `useJobSearch`, the list region renders `LoadingState` while a request
 //     is in flight, `ErrorState` (wired to `retry`) when the latest request
@@ -53,13 +52,11 @@
 import { useMemo, useState } from "react";
 import {
   clampToleranceStep,
-  filterJobsByViewport,
   orderByCommuteFit,
   resolveText,
   TOLERANCE_TARGET,
   type Coordinate,
   type Job,
-  type MapBounds,
 } from "../domain";
 import {
   DiscoveryHeader,
@@ -121,11 +118,6 @@ export function JobDiscoveryScreen({
   const [toleranceMinutes, setToleranceMinutes] = useState(() =>
     clampToleranceStep(initialToleranceMinutes),
   );
-  // Req 9.1: the current settled map viewport bounds; null until the map
-  // reports its first settled viewport.
-  const [viewportBounds, setViewportBounds] = useState<MapBounds | null>(
-    null,
-  );
 
   // Whether the routed, live-data path is active for this render. When an
   // explicit `jobs` prop is supplied, the hook is still called (Rules of
@@ -152,13 +144,12 @@ export function JobDiscoveryScreen({
   const isochronePins = jobs;
 
   // --- List cards pipeline --------------------------------------------------
-  // Restricted to the current map viewport (Req 6.2, 9.1-9.3), then ordered
-  // by descending Commute Fit with an A→Z tiebreak (Req 6.3, 9.5). Re-derives
-  // whenever the live `jobs` or the viewport bounds change.
-  const visibleJobs = useMemo(
-    () => orderByCommuteFit(filterJobsByViewport(jobs, viewportBounds)),
-    [jobs, viewportBounds],
-  );
+  // Every job the search returned (already bounded by the tolerance slider
+  // via the backend's `max_time` param), ordered by descending Commute Fit
+  // with an A→Z tiebreak (Req 6.3, 9.5). Not restricted to the current map
+  // viewport — panning/zooming the map must not hide cards for jobs that are
+  // still within the selected tolerance. Re-derives whenever `jobs` changes.
+  const visibleJobs = useMemo(() => orderByCommuteFit(jobs), [jobs]);
 
   // Single-selection handler shared by the JobList and the map, so the
   // highlight stays in sync across both regions.
@@ -211,10 +202,10 @@ export function JobDiscoveryScreen({
         {/*
           RIGHT region: the interactive Transit map. It receives `home` and
           `toleranceMinutes` directly (its own pins derive internally from
-          `jobs`, task 12) plus `onViewportSettle`, which updates the
-          `viewportBounds` state driving the list pipeline above (Req 9.1).
-          The map region is unaffected by `status` — it always renders the
-          current `jobs`.
+          `jobs`, task 12). The map region is unaffected by `status` — it
+          always renders the current `jobs`. The list is no longer tied to
+          the map's viewport, so panning/zooming the map has no effect on
+          which job cards are shown (Req 6.1-6.3).
 
           `<main>` (AppShell) is now capped to the viewport height at `lg:`
           and scrolls its own content internally, so this section's
@@ -240,7 +231,6 @@ export function JobDiscoveryScreen({
             onSelect={handleSelect}
             home={home ?? null}
             toleranceMinutes={toleranceMinutes}
-            onViewportSettle={setViewportBounds}
           />
         </div>
       </div>

@@ -28,7 +28,9 @@ from app.schemas.response import TransitSegment
 
 # Case-insensitive mapping from a Job_Posting ``employment_type`` to a frontend
 # Work_Model value. Lookups fold the source value to lower case before indexing;
-# there is deliberately no fallback default (unmapped -> None).
+# there is deliberately no fallback default (unmapped -> None). Used only as a
+# fallback when a job has no explicit ``work_model`` value of its own (see
+# :func:`resolve_work_model`).
 WORK_MODEL_MAP: dict[str, str] = {
     "remote": "Remote",
     "hybrid": "Hybrid",
@@ -39,11 +41,24 @@ WORK_MODEL_MAP: dict[str, str] = {
     "freelance": "On-site",
 }
 
+# The only values an explicit Job_Posting.work_model column is recognized as.
+# Any other value (including case-varied forms) is treated as unset, falling
+# back to the employment_type-derived mapping above.
+WORK_MODEL_VALUES: frozenset[str] = frozenset({"On-site", "Hybrid", "Remote"})
+
+# The only values a Job_Posting.career_growth_index column is recognized as.
+# Any other value (including case-varied forms) resolves to None.
+CAREER_GROWTH_VALUES: frozenset[str] = frozenset({"High", "Medium", "Stable"})
+
 # One outbound and one return trip per working day.
 TRIPS_PER_DAY = 2
 
 # Working days used to derive the monthly commute cost.
 WORKING_DAYS_PER_MONTH = 22
+
+# Monthly commute cost multiplier applied when work_model == "Hybrid": 2 days
+# in the office per week instead of 5 (2/5 = 0.4).
+HYBRID_MONTHLY_COST_MULTIPLIER = 0.4
 
 # Upper bound on the number of normalized desired-skill tokens a request may
 # supply before it is rejected as invalid (enforced by the request schema).
@@ -176,6 +191,38 @@ def derive_work_model(employment_type: str | None) -> str | None:
     return WORK_MODEL_MAP.get(key)
 
 
+def resolve_work_model(
+    work_model: str | None, employment_type: str | None
+) -> str | None:
+    """Resolve the final Work_Model for a job, preferring the explicit column.
+
+    A job's own ``work_model`` column (schema-expansion field) wins when it is
+    one of the three recognized values (case-sensitive exact match against
+    :data:`WORK_MODEL_VALUES`, matching the strict enum the data-generation
+    script writes). When ``work_model`` is ``None`` or not a recognized value,
+    falls back to :func:`derive_work_model` on ``employment_type`` so
+    pre-existing rows without the new column keep their prior behavior.
+    """
+
+    if work_model is not None and work_model in WORK_MODEL_VALUES:
+        return work_model
+    return derive_work_model(employment_type)
+
+
+def resolve_career_growth_index(career_growth_index: str | None) -> str | None:
+    """Validate a job's ``career_growth_index`` against the recognized enum.
+
+    Returns:
+        ``career_growth_index`` unchanged when it is exactly one of ``"High"``,
+        ``"Medium"``, ``"Stable"`` (:data:`CAREER_GROWTH_VALUES`); ``None``
+        otherwise (including ``None`` input, blank, or an unrecognized value).
+    """
+
+    if career_growth_index is not None and career_growth_index in CAREER_GROWTH_VALUES:
+        return career_growth_index
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Commute cost
 # ---------------------------------------------------------------------------
@@ -192,15 +239,28 @@ def per_trip_cost_baht(fare_thb: float) -> int:
     return max(0, round(fare_thb))
 
 
-def monthly_commute_cost_baht(per_trip: int) -> int:
+def monthly_commute_cost_baht(per_trip: int, work_model: str | None = None) -> int:
     """Derive the monthly commute cost from the per-trip cost.
 
     Multiplies ``per_trip`` by :data:`TRIPS_PER_DAY` (2) and
-    :data:`WORKING_DAYS_PER_MONTH` (22). A non-negative ``per_trip`` yields a
-    non-negative whole number (Requirements 7.3, 7.4).
+    :data:`WORKING_DAYS_PER_MONTH` (22), then adjusts for ``work_model``:
+
+    - ``"Hybrid"``: the full 5-day cost is multiplied by
+      :data:`HYBRID_MONTHLY_COST_MULTIPLIER` (0.4), reflecting 2 office days a
+      week instead of 5, and rounded to the nearest whole baht.
+    - ``"Remote"``: forced to ``0`` regardless of the per-trip fare.
+    - Any other value (``"On-site"`` or ``None``): the unadjusted 5-day cost.
+
+    A non-negative ``per_trip`` yields a non-negative whole number in every
+    case.
     """
 
-    return per_trip * TRIPS_PER_DAY * WORKING_DAYS_PER_MONTH
+    base = per_trip * TRIPS_PER_DAY * WORKING_DAYS_PER_MONTH
+    if work_model == "Remote":
+        return 0
+    if work_model == "Hybrid":
+        return max(0, round(base * HYBRID_MONTHLY_COST_MULTIPLIER))
+    return base
 
 
 # ---------------------------------------------------------------------------

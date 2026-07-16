@@ -19,6 +19,14 @@ class JobPosting(Base):
 
     Source values may be absent on serialization; columns are declared nullable
     to tolerate incomplete source rows without failing the load.
+
+    ``work_model``, ``years_experience_required``, and ``career_growth_index``
+    are the qualification-schema fields added for the booth demo dataset
+    expansion. ``work_model`` is an explicit source column (distinct from the
+    pre-existing ``employment_type`` -> Work_Model derivation in
+    :func:`app.services.enrichment.derive_work_model`): when present it is
+    used as-is, and the derivation from ``employment_type`` remains as a
+    fallback for older rows that only carry ``employment_type``.
     """
 
     __tablename__ = "job_postings"
@@ -29,3 +37,11 @@ class JobPosting(Base):
     salary: Mapped[int | None] = mapped_column(nullable=True)
     required_skills: Mapped[str | None] = mapped_column(nullable=True)
     employment_type: Mapped[str | None] = mapped_column(nullable=True)
+    # Restricted to "On-site" | "Hybrid" | "Remote" at the application layer
+    # (see app.services.enrichment.WORK_MODEL_VALUES); stored as free text and
+    # validated on write by the loader, not by a DB-level CHECK constraint.
+    work_model: Mapped[str | None] = mapped_column(nullable=True)
+    years_experience_required: Mapped[int | None] = mapped_column(nullable=True)
+    # Restricted to "High" | "Medium" | "Stable" at the application layer (see
+    # app.services.enrichment.CAREER_GROWTH_VALUES).
+    career_growth_index: Mapped[str | None] = mapped_column(nullable=True)

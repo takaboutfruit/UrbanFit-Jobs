@@ -318,9 +318,14 @@ async def load_job_postings(
     """Load ``mock_job_postings.csv`` into ``job_postings``.
 
     Maps ``job_id``, ``company_id`` (via :func:`normalize_company_id`),
-    ``job_title``, ``salary``, ``required_skills`` and ``employment_type``.
-    Rows whose ``company_id`` has no matching Company (dangling foreign key) are
-    skipped so they never surface in search results (Requirement 7.7).
+    ``job_title``, ``salary``, ``required_skills``, ``employment_type``, and
+    the qualification-schema columns ``work_model``, ``years_experience_required``,
+    ``career_growth_index`` (all optional; absent/unrecognized values are
+    stored as-is and validated downstream by
+    :func:`app.services.enrichment.resolve_work_model` /
+    :func:`~app.services.enrichment.resolve_career_growth_index`). Rows whose
+    ``company_id`` has no matching Company (dangling foreign key) are skipped
+    so they never surface in search results (Requirement 7.7).
 
     Returns:
         The count of job postings loaded.
@@ -344,6 +349,11 @@ async def load_job_postings(
                     salary=_parse_int(row.get("salary")),
                     required_skills=_clean_str(row.get("required_skills")),
                     employment_type=_clean_str(row.get("employment_type")),
+                    work_model=_clean_str(row.get("work_model")),
+                    years_experience_required=_parse_int(
+                        row.get("years_experience_required")
+                    ),
+                    career_growth_index=_clean_str(row.get("career_growth_index")),
                 )
             )
             seen_job_ids.add(job_id)
